@@ -660,7 +660,7 @@
                 display.classList.remove('hide');
                 display.classList.add('show');
 
-                // Hide after 3 seconds (doubled from 1.5s)
+                // Hide after 5 seconds (plenty of time for kids to read)
                 setTimeout(() => {
                     display.classList.remove('show');
                     display.classList.add('hide');
@@ -670,7 +670,7 @@
                         display.classList.remove('hide');
                         display.style.transform = ''; // Reset transform
                     }, 400);
-                }, 3000);
+                }, 5000);
             }
 
             animateCorrect(cell) {
