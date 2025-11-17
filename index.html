@@ -482,7 +482,10 @@
                     }
                 }
                 this.totalCorrect = count;
-                
+
+                // Hide equation when selecting new table
+                this.hideEquation();
+
                 // Update button states - only change active state, not colors
                 document.querySelectorAll('.selector-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -490,14 +493,14 @@
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
                 });
-                
+
                 // Set the selected button as active
                 const selectedBtn = document.querySelector(`[data-number="${number}"]`);
                 selectedBtn.classList.add('active');
-                
+
                 // Reset grid
                 this.createGrid();
-                
+
                 // Mark already found correct answers from previous attempts
                 this.correctCells.forEach(number => {
                     const cell = document.querySelector(`.number-cell[data-number="${number}"]`);
@@ -508,7 +511,7 @@
                         cell.style.fontWeight = 'bold';
                     }
                 });
-                
+
                 this.updateProgress();
             }
             
@@ -549,17 +552,12 @@
                     cell.style.fontWeight = 'bold';
                     this.correctCells.add(number);
 
-                    // Hide previous equation (if any) and show new one
-                    this.hideEquation();
-                    setTimeout(() => {
-                        this.showEquation(number, cell);
-                    }, 100);
+                    // Show new equation (it will update or show without hiding)
+                    this.showEquation(number, cell);
 
                     this.playSound('applause');
                     this.animateCorrect(cell);
                 } else {
-                    // Hide equation on incorrect click
-                    this.hideEquation();
                     // Incorrect answer
                     cell.classList.add('incorrect');
                     cell.style.background = 'linear-gradient(45deg, #FF6B6B, #FF8E8E)';
@@ -648,19 +646,26 @@
                 const card = document.getElementById('equation-display-card');
                 const text = document.getElementById('equation-text-inline');
 
-                // Set equation text
+                const isAlreadyVisible = container.style.display === 'block';
+
+                // Update equation text
                 text.textContent = equationText;
 
-                // Show container and animate card
-                container.style.display = 'block';
+                if (!isAlreadyVisible) {
+                    // First time showing - animate in
+                    container.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    // Already visible - just update text with a subtle pulse
+                    card.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        card.style.transform = 'scale(1)';
+                    }, 200);
+                }
 
-                // Trigger animation
-                setTimeout(() => {
-                    card.style.transform = 'scale(1)';
-                }, 10);
-
-                // Equation stays visible until user clicks another cell
-                // It will be hidden by hideEquation() method
+                // Equation stays visible permanently
             }
 
             hideEquation() {
@@ -707,14 +712,17 @@
                 this.selectedNumber = null;
                 this.correctCells.clear();
                 this.totalCorrect = 0;
-                
+
+                // Hide equation when resetting
+                this.hideEquation();
+
                 // Reset buttons - restore original colors
                 document.querySelectorAll('.selector-btn').forEach(btn => {
                     btn.classList.remove('active');
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
                 });
-                
+
                 // Reset grid
                 this.createGrid();
                 this.updateProgress();
