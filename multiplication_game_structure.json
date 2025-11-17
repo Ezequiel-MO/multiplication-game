@@ -1,0 +1,35 @@
+{
+    "esquema": {
+        "númeroDiapositiva": 1,
+        "títol": "Mestre de la Multiplicació",
+        "subtítol": "Aprèn les Taules de Multiplicar Jugant"
+    },
+    "taulaDeContinguts": {
+        "númeroDiapositiva": 2
+    },
+    "capítols": {
+        "númeroDiapositiva": 3,
+        "títolCapítol": "Característiques del Joc",
+        "diapositives": [
+            {
+                "númeroDiapositiva": 4,
+                "títolDiapositiva": "Graella Numèrica Interactiva",
+                "contingutDiapositiva": "Graella de 10x10 que mostra els números de l'1 al 100 amb cel·les tàctils que ofereixen retroacció visual i auditiva immediata. Els tocs correctes activen animacions colorides i sons positius, mentre que els incorrectes mostren indicadors d'error subtils."
+            },
+            {
+                "númeroDiapositiva": 5,
+                "títolDiapositiva": "Selector de Multiplicacions",
+                "contingutDiapositiva": "Selector numèric fàcil d'utilitzar (de l'1 al 10) que permet als nens triar quina taula de multiplicar practicar. Els números seleccionats es ressalten amb animacions atractives i una retroacció visual clara."
+            },
+            {
+                "númeroDiapositiva": 6,
+                "títolDiapositiva": "Aprenentatge Mitjançant el Joc",
+                "contingutDiapositiva": "Sistema de seguiment del progrés que celebra els assoliments amb animacions de confeti, estrelles i missatges d'ànim. La completació del joc activa pantalles de celebració amb trofeus i reforç positiu."
+            }
+        ]
+    },
+    "final": {
+        "númeroDiapositiva": 7,
+        "contingutFinal": "Comença la teva aventura de multiplicacions i converteix-te en un Mestre de les Matemàtiques!"
+    }
+}
