@@ -123,6 +123,10 @@
         #equation-display.hide {
             animation: equationExit 0.4s ease-in-out forwards;
         }
+
+        #equation-display-card {
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
         
         .selector-btn {
             transition: all 0.3s ease;
@@ -264,6 +268,13 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
+    <!-- Reset Button at Top -->
+    <div class="fixed top-2 right-2 sm:top-4 sm:right-4 z-40">
+        <button id="reset-btn" class="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-base">
+            🔄 Nou Joc
+        </button>
+    </div>
+
     <!-- Main Game Container -->
     <div class="container mx-auto px-2 py-2 max-w-md sm:px-4 sm:py-6">
         <!-- Header -->
@@ -314,26 +325,16 @@
             </div>
         </div>
 
-        <!-- Reset Button -->
-        <div class="text-center">
-            <button id="reset-btn" class="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-base">
-                🔄 Nou Joc
-            </button>
-        </div>
-    </div>
-    
-    <!-- Equation Display Overlay -->
-    <div id="equation-overlay" class="fixed inset-0 flex items-center justify-center pointer-events-none z-50" style="display: none;">
-        <div id="equation-display" class="transform scale-0">
-            <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-white">
+        <!-- Equation Display Below Grid -->
+        <div id="equation-container" class="mt-3 sm:mt-4" style="display: none;">
+            <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-8 sm:py-6 shadow-2xl border-4 border-white transform scale-0" id="equation-display-card">
                 <div class="text-white text-center">
-                    <div class="text-6xl sm:text-8xl font-bold mb-2" id="equation-text">6 × 4 = 24</div>
-                    <div class="text-4xl sm:text-6xl animate-bounce">👏 🎉 👏</div>
+                    <div class="text-3xl sm:text-5xl md:text-6xl font-bold" id="equation-text-inline">6 × 4 = 24</div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <!-- Celebration Overlay -->
     <div id="celebration-overlay" class="celebration-overlay">
         <div class="flex items-center justify-center h-full p-4">
@@ -643,58 +644,36 @@
                 const multiplier = number / this.selectedNumber;
                 const equationText = `${multiplier} × ${this.selectedNumber} = ${number}`;
 
-                const overlay = document.getElementById('equation-overlay');
-                const display = document.getElementById('equation-display');
-                const text = document.getElementById('equation-text');
+                const container = document.getElementById('equation-container');
+                const card = document.getElementById('equation-display-card');
+                const text = document.getElementById('equation-text-inline');
 
                 // Set equation text
                 text.textContent = equationText;
 
-                // Get clicked cell position
-                const cellRect = clickedCell.getBoundingClientRect();
-                const cellCenterX = cellRect.left + cellRect.width / 2;
-                const cellCenterY = clickedCell.top + cellRect.height / 2;
+                // Show container and animate card
+                container.style.display = 'block';
 
-                // Calculate screen center
-                const screenCenterX = window.innerWidth / 2;
-                const screenCenterY = window.innerHeight / 2;
-
-                // Position equation away from clicked cell
-                // If cell is in top half, show equation in bottom half, and vice versa
-                let translateY = '0';
-                if (cellCenterY < screenCenterY) {
-                    // Cell in top half - show equation lower
-                    translateY = '25vh';
-                } else {
-                    // Cell in bottom half - show equation higher
-                    translateY = '-25vh';
-                }
-
-                // Apply transform
-                display.style.transform = `translateY(${translateY})`;
-
-                // Show overlay
-                overlay.style.display = 'flex';
-                display.classList.remove('hide');
-                display.classList.add('show');
+                // Trigger animation
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 10);
 
                 // Equation stays visible until user clicks another cell
                 // It will be hidden by hideEquation() method
             }
 
             hideEquation() {
-                const overlay = document.getElementById('equation-overlay');
-                const display = document.getElementById('equation-display');
+                const container = document.getElementById('equation-container');
+                const card = document.getElementById('equation-display-card');
 
-                if (overlay.style.display === 'flex') {
-                    display.classList.remove('show');
-                    display.classList.add('hide');
+                if (container.style.display === 'block') {
+                    // Animate out
+                    card.style.transform = 'scale(0)';
 
                     setTimeout(() => {
-                        overlay.style.display = 'none';
-                        display.classList.remove('hide');
-                        display.style.transform = ''; // Reset transform
-                    }, 400);
+                        container.style.display = 'none';
+                    }, 300);
                 }
             }
 
