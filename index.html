@@ -192,28 +192,31 @@
         /* Mobile-specific optimizations */
         @media (max-width: 640px) {
             .game-container {
-                border-radius: 16px;
-                padding: 1rem !important;
+                border-radius: 12px;
+                padding: 0.75rem !important;
             }
 
             .number-cell {
-                font-size: 0.75rem;
-                min-height: 36px;
-                min-width: 36px;
-                border-radius: 6px;
+                font-size: 0.625rem;
+                min-height: 28px;
+                min-width: 28px;
+                border-radius: 4px;
+                padding: 0.125rem !important;
             }
 
             .selector-btn {
-                font-size: 1rem;
-                padding: 0.625rem !important;
+                font-size: 0.875rem;
+                padding: 0.5rem !important;
+                min-height: 36px;
+                min-width: 36px;
             }
 
             h1 {
-                font-size: 1.75rem !important;
+                font-size: 1.25rem !important;
             }
 
             h2 {
-                font-size: 1.125rem !important;
+                font-size: 0.875rem !important;
             }
 
             .celebration-content {
@@ -225,14 +228,16 @@
         /* Extra small phones */
         @media (max-width: 375px) {
             .number-cell {
-                font-size: 0.7rem;
-                min-height: 32px;
-                min-width: 32px;
+                font-size: 0.5rem;
+                min-height: 26px;
+                min-width: 26px;
+                padding: 0.0625rem !important;
             }
 
             .selector-btn {
-                min-height: 44px;
-                min-width: 44px;
+                min-height: 32px;
+                min-width: 32px;
+                font-size: 0.75rem;
             }
         }
 
@@ -260,58 +265,58 @@
 </head>
 <body class="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
     <!-- Main Game Container -->
-    <div class="container mx-auto px-3 py-4 max-w-md sm:px-4 sm:py-6">
+    <div class="container mx-auto px-2 py-2 max-w-md sm:px-4 sm:py-6">
         <!-- Header -->
-        <div class="text-center mb-4 sm:mb-6">
-            <h1 class="text-4xl font-bold text-white mb-2 drop-shadow-lg">🎯 Mestre de Multiplicacions</h1>
-            <p class="text-white text-base sm:text-lg opacity-90">Aprèn les Taules Multiplicant Jugant!</p>
+        <div class="text-center mb-2 sm:mb-6">
+            <h1 class="text-xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">🎯 Multiplicacions</h1>
+            <p class="text-white text-xs sm:text-lg opacity-90 hidden sm:block">Aprèn les Taules Multiplicant Jugant!</p>
         </div>
         
         <!-- Game Card -->
-        <div class="game-container p-6 mb-4 sm:mb-6">
+        <div class="game-container p-3 sm:p-6 mb-2 sm:mb-6">
             <!-- Number Selector -->
-            <div class="mb-4 sm:mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-3 sm:mb-4 text-center">📝 Tria la Teva Taula</h2>
-                <div class="grid grid-cols-5 gap-2 sm:gap-3" id="number-selector">
-                    <button class="selector-btn bg-blue-100 text-blue-800 p-3 text-lg" data-number="1">1</button>
-                    <button class="selector-btn bg-green-100 text-green-800 p-3 text-lg" data-number="2">2</button>
-                    <button class="selector-btn bg-yellow-100 text-yellow-800 p-3 text-lg" data-number="3">3</button>
-                    <button class="selector-btn bg-purple-100 text-purple-800 p-3 text-lg" data-number="4">4</button>
-                    <button class="selector-btn bg-red-100 text-red-800 p-3 text-lg" data-number="5">5</button>
-                    <button class="selector-btn bg-indigo-100 text-indigo-800 p-3 text-lg" data-number="6">6</button>
-                    <button class="selector-btn bg-pink-100 text-pink-800 p-3 text-lg" data-number="7">7</button>
-                    <button class="selector-btn bg-orange-100 text-orange-800 p-3 text-lg" data-number="8">8</button>
-                    <button class="selector-btn bg-teal-100 text-teal-800 p-3 text-lg" data-number="9">9</button>
-                    <button class="selector-btn bg-gray-100 text-gray-800 p-3 text-lg" data-number="10">10</button>
+            <div class="mb-2 sm:mb-6">
+                <h2 class="text-sm sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 text-center">📝 Tria Taula</h2>
+                <div class="grid grid-cols-5 gap-1.5 sm:gap-3" id="number-selector">
+                    <button class="selector-btn bg-blue-100 text-blue-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="1">1</button>
+                    <button class="selector-btn bg-green-100 text-green-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="2">2</button>
+                    <button class="selector-btn bg-yellow-100 text-yellow-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="3">3</button>
+                    <button class="selector-btn bg-purple-100 text-purple-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="4">4</button>
+                    <button class="selector-btn bg-red-100 text-red-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="5">5</button>
+                    <button class="selector-btn bg-indigo-100 text-indigo-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="6">6</button>
+                    <button class="selector-btn bg-pink-100 text-pink-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="7">7</button>
+                    <button class="selector-btn bg-orange-100 text-orange-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="8">8</button>
+                    <button class="selector-btn bg-teal-100 text-teal-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="9">9</button>
+                    <button class="selector-btn bg-gray-100 text-gray-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="10">10</button>
                 </div>
             </div>
             
             <!-- Progress Bar -->
-            <div class="mb-4 sm:mb-6">
-                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+            <div class="mb-2 sm:mb-6">
+                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
                     <span>Progrés</span>
                     <span id="progress-text">0/0</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 sm:h-3">
-                    <div id="progress-bar" class="progress-bar h-2.5 sm:h-3 rounded-full" style="width: 0%"></div>
+                <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                    <div id="progress-bar" class="progress-bar h-2 sm:h-3 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
             <!-- Number Grid -->
-            <div id="number-grid" class="grid grid-cols-10 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+            <div id="number-grid" class="grid grid-cols-10 gap-1 sm:gap-2 mb-2 sm:mb-4">
                 <!-- Grid cells will be generated by JavaScript -->
             </div>
             
             <!-- Instructions -->
-            <div class="text-center text-gray-600 text-xs sm:text-sm leading-relaxed">
+            <div class="text-center text-gray-600 text-xs leading-relaxed hidden sm:block">
                 <p>🎯 Toca tots els múltiples del nombre seleccionat!</p>
-                <p class="mt-1">✅ Les respostes correctes es tornen verdes, ❌ les incorrectes es tornen vermelles</p>
+                <p class="mt-1">✅ Correctes verdes, ❌ Incorrectes vermelles</p>
             </div>
         </div>
 
         <!-- Reset Button -->
         <div class="text-center">
-            <button id="reset-btn" class="bg-white text-purple-600 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm sm:text-base">
+            <button id="reset-btn" class="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-base">
                 🔄 Nou Joc
             </button>
         </div>
@@ -467,7 +472,15 @@
             selectNumber(number) {
                 this.selectedNumber = number;
                 this.correctCells.clear();
-                this.totalCorrect = Math.floor(this.gridSize / number);
+
+                // Count actual multiples in the grid (1 to 100)
+                let count = 0;
+                for (let i = 1; i <= this.gridSize; i++) {
+                    if (i % number === 0) {
+                        count++;
+                    }
+                }
+                this.totalCorrect = count;
                 
                 // Update button states - only change active state, not colors
                 document.querySelectorAll('.selector-btn').forEach(btn => {
