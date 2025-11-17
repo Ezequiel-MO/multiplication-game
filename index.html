@@ -548,12 +548,17 @@
                     cell.style.fontWeight = 'bold';
                     this.correctCells.add(number);
 
-                    // Show equation display with applause
-                    this.showEquation(number, cell);
+                    // Hide previous equation (if any) and show new one
+                    this.hideEquation();
+                    setTimeout(() => {
+                        this.showEquation(number, cell);
+                    }, 100);
 
                     this.playSound('applause');
                     this.animateCorrect(cell);
                 } else {
+                    // Hide equation on incorrect click
+                    this.hideEquation();
                     // Incorrect answer
                     cell.classList.add('incorrect');
                     cell.style.background = 'linear-gradient(45deg, #FF6B6B, #FF8E8E)';
@@ -648,7 +653,7 @@
                 // Get clicked cell position
                 const cellRect = clickedCell.getBoundingClientRect();
                 const cellCenterX = cellRect.left + cellRect.width / 2;
-                const cellCenterY = cellRect.top + cellRect.height / 2;
+                const cellCenterY = clickedCell.top + cellRect.height / 2;
 
                 // Calculate screen center
                 const screenCenterX = window.innerWidth / 2;
@@ -673,8 +678,15 @@
                 display.classList.remove('hide');
                 display.classList.add('show');
 
-                // Hide after 5 seconds (plenty of time for kids to read)
-                setTimeout(() => {
+                // Equation stays visible until user clicks another cell
+                // It will be hidden by hideEquation() method
+            }
+
+            hideEquation() {
+                const overlay = document.getElementById('equation-overlay');
+                const display = document.getElementById('equation-display');
+
+                if (overlay.style.display === 'flex') {
                     display.classList.remove('show');
                     display.classList.add('hide');
 
@@ -683,7 +695,7 @@
                         display.classList.remove('hide');
                         display.style.transform = ''; // Reset transform
                     }, 400);
-                }, 5000);
+                }
             }
 
             animateCorrect(cell) {
