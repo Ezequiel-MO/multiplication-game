@@ -1115,13 +1115,31 @@
                 this.bestStreak = 0;
                 this.level = 1;
                 this.correctAnswers = 0;
+                this.wrongAnswers = 0;
                 this.activeTables = [2, 3, 4, 5];
                 this.currentQuestion = null;
                 this.correctAnswer = null;
+
+                // Adaptive timing system
                 this.timeLeft = 100;
                 this.maxTime = 100;
                 this.timerInterval = null;
                 this.isPlaying = false;
+
+                // Speed control - starts slow and adapts
+                this.baseDecayRate = 0.3;      // Very slow base decay (was 1)
+                this.currentDecayRate = 0.3;   // Current decay rate
+                this.minDecayRate = 0.2;       // Minimum (slowest) decay
+                this.maxDecayRate = 1.5;       // Maximum (fastest) decay
+
+                // Response time tracking for adaptive difficulty
+                this.questionStartTime = 0;
+                this.recentResponseTimes = [];  // Track last 5 response times
+                this.avgResponseTime = 3000;    // Start assuming 3 second avg response
+
+                // Mastery tracking per table
+                this.tableMastery = {};  // { table: { correct: 0, wrong: 0 } }
+
                 this.init();
             }
 
@@ -1187,8 +1205,20 @@
                 this.streak = 0;
                 this.bestStreak = 0;
                 this.correctAnswers = 0;
+                this.wrongAnswers = 0;
                 this.level = 1;
                 this.timeLeft = this.maxTime;
+
+                // Reset adaptive systems
+                this.currentDecayRate = this.baseDecayRate;
+                this.recentResponseTimes = [];
+                this.avgResponseTime = 3000;
+                this.tableMastery = {};
+
+                // Initialize mastery tracking for active tables
+                this.activeTables.forEach(table => {
+                    this.tableMastery[table] = { correct: 0, wrong: 0 };
+                });
 
                 // Disable table selection
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
@@ -1212,11 +1242,14 @@
 
             startTimer() {
                 this.timerInterval = setInterval(() => {
-                    this.timeLeft -= 1;
+                    // Adaptive decay - slows down if player is hesitating
+                    this.timeLeft -= this.currentDecayRate;
                     this.updateTimerBar();
 
-                    if (this.timeLeft <= 20) {
+                    if (this.timeLeft <= 25) {
                         document.getElementById('timer-bar').classList.add('warning');
+                    } else {
+                        document.getElementById('timer-bar').classList.remove('warning');
                     }
 
                     if (this.timeLeft <= 0) {
@@ -1227,14 +1260,80 @@
 
             updateTimerBar() {
                 const percentage = (this.timeLeft / this.maxTime) * 100;
-                document.getElementById('timer-bar').style.width = `${percentage}%`;
+                document.getElementById('timer-bar').style.width = `${Math.max(0, percentage)}%`;
+            }
+
+            // Calculate mastery score (0-1) based on recent performance
+            calculateMasteryScore() {
+                if (this.correctAnswers + this.wrongAnswers === 0) return 0.5;
+
+                const totalAnswers = this.correctAnswers + this.wrongAnswers;
+                const accuracy = this.correctAnswers / totalAnswers;
+
+                // Factor in streak (consecutive correct answers show mastery)
+                const streakBonus = Math.min(this.streak / 10, 0.3);
+
+                // Factor in speed (faster responses show mastery)
+                const speedFactor = this.avgResponseTime < 2000 ? 0.2 :
+                                   this.avgResponseTime < 3000 ? 0.1 : 0;
+
+                return Math.min(1, accuracy + streakBonus + speedFactor);
+            }
+
+            // Adjust game speed based on player performance
+            adjustDifficulty(wasCorrect, responseTime) {
+                // Track response time
+                this.recentResponseTimes.push(responseTime);
+                if (this.recentResponseTimes.length > 5) {
+                    this.recentResponseTimes.shift();
+                }
+                this.avgResponseTime = this.recentResponseTimes.reduce((a, b) => a + b, 0) / this.recentResponseTimes.length;
+
+                const mastery = this.calculateMasteryScore();
+
+                if (wasCorrect) {
+                    // Player is doing well - gradually increase speed
+                    if (mastery > 0.8 && responseTime < 2000) {
+                        // High mastery + fast response = increase speed more
+                        this.currentDecayRate = Math.min(this.maxDecayRate, this.currentDecayRate + 0.08);
+                    } else if (mastery > 0.6) {
+                        // Good mastery = slight speed increase
+                        this.currentDecayRate = Math.min(this.maxDecayRate, this.currentDecayRate + 0.03);
+                    }
+                    // If mastery is low, keep speed the same for correct answers
+                } else {
+                    // Player got it wrong - slow down to help them learn
+                    this.currentDecayRate = Math.max(this.minDecayRate, this.currentDecayRate - 0.15);
+                }
+
+                // If player is taking long to respond (hesitating), slow down
+                if (responseTime > 5000) {
+                    this.currentDecayRate = Math.max(this.minDecayRate, this.currentDecayRate - 0.1);
+                }
             }
 
             generateQuestion() {
-                const table = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
+                // Prioritize tables where player is struggling
+                let table;
+                const strugglingTables = this.activeTables.filter(t => {
+                    const mastery = this.tableMastery[t];
+                    if (!mastery || mastery.correct + mastery.wrong < 2) return false;
+                    return mastery.correct / (mastery.correct + mastery.wrong) < 0.7;
+                });
+
+                if (strugglingTables.length > 0 && Math.random() < 0.4) {
+                    // 40% chance to practice a struggling table
+                    table = strugglingTables[Math.floor(Math.random() * strugglingTables.length)];
+                } else {
+                    table = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
+                }
+
                 const multiplier = Math.floor(Math.random() * 10) + 1;
                 this.correctAnswer = table * multiplier;
                 this.currentQuestion = { table, multiplier };
+
+                // Start timing for this question
+                this.questionStartTime = Date.now();
 
                 document.getElementById('speed-question').textContent = `${table} × ${multiplier} = ?`;
 
@@ -1272,24 +1371,39 @@
             }
 
             checkAnswer(answer) {
+                const responseTime = Date.now() - this.questionStartTime;
                 const buttons = document.querySelectorAll('.answer-btn');
+                const table = this.currentQuestion.table;
 
                 if (answer === this.correctAnswer) {
                     this.streak++;
                     this.correctAnswers++;
                     if (this.streak > this.bestStreak) this.bestStreak = this.streak;
 
+                    // Track table mastery
+                    if (this.tableMastery[table]) {
+                        this.tableMastery[table].correct++;
+                    }
+
                     const streakBonus = Math.min(this.streak - 1, 10) * 5;
                     const levelBonus = (this.level - 1) * 10;
-                    const points = 10 + streakBonus + levelBonus;
+                    // Speed bonus for fast answers
+                    const speedBonus = responseTime < 1500 ? 15 : responseTime < 2500 ? 10 : responseTime < 4000 ? 5 : 0;
+                    const points = 10 + streakBonus + levelBonus + speedBonus;
                     this.score += points;
 
-                    this.timeLeft = Math.min(this.timeLeft + 15, this.maxTime);
+                    // More generous time reward based on speed and streak
+                    let timeReward = 20; // Base reward (was 15)
+                    if (responseTime < 2000) timeReward += 10;  // Fast answer bonus
+                    if (this.streak >= 3) timeReward += 5;       // Streak bonus
+                    if (this.streak >= 5) timeReward += 5;       // Higher streak bonus
+
+                    this.timeLeft = Math.min(this.timeLeft + timeReward, this.maxTime);
                     document.getElementById('timer-bar').classList.remove('warning');
 
+                    // Level up every 10 correct answers
                     if (this.correctAnswers % 10 === 0) {
                         this.level++;
-                        this.maxTime = Math.max(60, this.maxTime - 5);
                     }
 
                     buttons.forEach(btn => {
@@ -1300,9 +1414,20 @@
 
                     playSound('correct');
                     this.showStreakBadge();
+
+                    // Adjust difficulty based on performance
+                    this.adjustDifficulty(true, responseTime);
                 } else {
                     this.streak = 0;
-                    this.timeLeft = Math.max(0, this.timeLeft - 20);
+                    this.wrongAnswers++;
+
+                    // Track table mastery
+                    if (this.tableMastery[table]) {
+                        this.tableMastery[table].wrong++;
+                    }
+
+                    // Smaller penalty (was -20)
+                    this.timeLeft = Math.max(0, this.timeLeft - 10);
 
                     buttons.forEach(btn => {
                         if (parseInt(btn.textContent) === answer) {
@@ -1315,6 +1440,9 @@
 
                     playSound('incorrect');
                     this.hideStreakBadge();
+
+                    // Adjust difficulty - slow down after wrong answer
+                    this.adjustDifficulty(false, responseTime);
                 }
 
                 this.updateDisplay();
@@ -1323,7 +1451,7 @@
                     if (this.isPlaying) {
                         this.generateQuestion();
                     }
-                }, 500);
+                }, 600);
             }
 
             showStreakBadge() {
@@ -1398,9 +1526,14 @@
                 this.streak = 0;
                 this.bestStreak = 0;
                 this.correctAnswers = 0;
+                this.wrongAnswers = 0;
                 this.level = 1;
                 this.timeLeft = 100;
                 this.maxTime = 100;
+                this.currentDecayRate = this.baseDecayRate;
+                this.recentResponseTimes = [];
+                this.avgResponseTime = 3000;
+                this.tableMastery = {};
 
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
