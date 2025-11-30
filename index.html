@@ -351,6 +351,19 @@
             transform: scale(0.92);
         }
 
+        /* Speed game mode buttons */
+        .speed-mode-btn {
+            transition: transform 0.1s ease-out, background-color 0.15s ease-out;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 44px;
+        }
+
+        .speed-mode-btn:active {
+            transform: scale(0.95);
+        }
+
         .streak-badge {
             animation: pulse-glow 1s ease-in-out infinite;
         }
@@ -1311,6 +1324,18 @@
                 <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="1">?</button>
                 <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="2">?</button>
                 <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="3">?</button>
+            </div>
+
+            <!-- Game Mode Selector -->
+            <div class="game-container p-3 mb-3">
+                <div class="flex justify-center gap-2">
+                    <button id="speed-mode-product" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-purple-600 text-white">
+                        3 × 4 = ?
+                    </button>
+                    <button id="speed-mode-factor" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-gray-300 text-gray-600">
+                        3 × ? = 12
+                    </button>
+                </div>
             </div>
 
             <!-- Table Selector for Speed Game -->
@@ -2371,6 +2396,9 @@
                 this.currentQuestion = null;
                 this.correctAnswer = null;
 
+                // Game mode: 'product' (3×4=?) or 'factor' (3×?=12)
+                this.gameMode = 'product';
+
                 // Adaptive timing system
                 this.timeLeft = 100;
                 this.maxTime = 100;
@@ -2409,6 +2437,22 @@
             }
 
             bindEvents() {
+                // Game mode selector buttons
+                const productModeBtn = document.getElementById('speed-mode-product');
+                const factorModeBtn = document.getElementById('speed-mode-factor');
+
+                const productHandler = createTouchHandler(() => {
+                    if (!this.isPlaying) this.setGameMode('product');
+                });
+                productModeBtn.addEventListener('touchstart', productHandler.onTouchStart, { passive: false });
+                productModeBtn.addEventListener('click', productHandler.onClick);
+
+                const factorHandler = createTouchHandler(() => {
+                    if (!this.isPlaying) this.setGameMode('factor');
+                });
+                factorModeBtn.addEventListener('touchstart', factorHandler.onTouchStart, { passive: false });
+                factorModeBtn.addEventListener('click', factorHandler.onClick);
+
                 // Table selector buttons with touch optimization
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
                     const handler = createTouchHandler(() => {
@@ -2474,6 +2518,27 @@
                 }
             }
 
+            setGameMode(mode) {
+                if (this.isPlaying) return;
+
+                this.gameMode = mode;
+
+                const productBtn = document.getElementById('speed-mode-product');
+                const factorBtn = document.getElementById('speed-mode-factor');
+
+                if (mode === 'product') {
+                    productBtn.classList.remove('bg-gray-300', 'text-gray-600');
+                    productBtn.classList.add('bg-purple-600', 'text-white');
+                    factorBtn.classList.remove('bg-purple-600', 'text-white');
+                    factorBtn.classList.add('bg-gray-300', 'text-gray-600');
+                } else {
+                    factorBtn.classList.remove('bg-gray-300', 'text-gray-600');
+                    factorBtn.classList.add('bg-purple-600', 'text-white');
+                    productBtn.classList.remove('bg-purple-600', 'text-white');
+                    productBtn.classList.add('bg-gray-300', 'text-gray-600');
+                }
+            }
+
             startGame() {
                 this.isPlaying = true;
                 this.score = 0;
@@ -2495,8 +2560,12 @@
                     this.tableMastery[table] = { correct: 0, wrong: 0 };
                 });
 
-                // Disable table selection
+                // Disable table and mode selection during game
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.5';
+                });
+                document.querySelectorAll('.speed-mode-btn').forEach(btn => {
                     btn.style.pointerEvents = 'none';
                     btn.style.opacity = '0.5';
                 });
@@ -2663,45 +2732,81 @@
                 }
 
                 const multiplier = Math.floor(Math.random() * 10) + 1;
-                this.correctAnswer = table * multiplier;
-                this.currentQuestion = { table, multiplier };
+                const product = table * multiplier;
+                this.currentQuestion = { table, multiplier, product };
 
                 // Start timing for this question
                 this.questionStartTime = Date.now();
 
-                document.getElementById('speed-question').textContent = `${table} × ${multiplier} = ?`;
+                if (this.gameMode === 'product') {
+                    // Product mode: 3 × 4 = ? (find the product)
+                    this.correctAnswer = product;
+                    document.getElementById('speed-question').textContent = `${table} × ${multiplier} = ?`;
 
-                // Generate answer options
-                const answers = [this.correctAnswer];
-                while (answers.length < 4) {
-                    let wrongAnswer;
-                    const wrongType = Math.floor(Math.random() * 4);
+                    // Generate answer options (products)
+                    const answers = [this.correctAnswer];
+                    while (answers.length < 4) {
+                        let wrongAnswer;
+                        const wrongType = Math.floor(Math.random() * 4);
 
-                    if (wrongType === 0) {
-                        wrongAnswer = table * (multiplier + (Math.random() > 0.5 ? 1 : -1));
-                    } else if (wrongType === 1) {
-                        const wrongTable = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
-                        wrongAnswer = wrongTable * multiplier;
-                    } else if (wrongType === 2) {
-                        wrongAnswer = this.correctAnswer + Math.floor(Math.random() * 10) - 5;
-                    } else {
-                        wrongAnswer = Math.floor(Math.random() * 100) + 1;
+                        if (wrongType === 0) {
+                            wrongAnswer = table * (multiplier + (Math.random() > 0.5 ? 1 : -1));
+                        } else if (wrongType === 1) {
+                            const wrongTable = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
+                            wrongAnswer = wrongTable * multiplier;
+                        } else if (wrongType === 2) {
+                            wrongAnswer = this.correctAnswer + Math.floor(Math.random() * 10) - 5;
+                        } else {
+                            wrongAnswer = Math.floor(Math.random() * 100) + 1;
+                        }
+
+                        if (wrongAnswer > 0 && wrongAnswer !== this.correctAnswer && !answers.includes(wrongAnswer)) {
+                            answers.push(wrongAnswer);
+                        }
                     }
 
-                    if (wrongAnswer > 0 && wrongAnswer !== this.correctAnswer && !answers.includes(wrongAnswer)) {
-                        answers.push(wrongAnswer);
+                    // Shuffle and update buttons
+                    answers.sort(() => Math.random() - 0.5);
+                    const buttons = document.querySelectorAll('.answer-btn');
+                    buttons.forEach((btn, index) => {
+                        btn.textContent = answers[index];
+                        btn.classList.remove('correct-answer', 'wrong-answer');
+                    });
+                } else {
+                    // Factor mode: 3 × ? = 12 (find the missing factor)
+                    this.correctAnswer = multiplier;
+                    document.getElementById('speed-question').textContent = `${table} × ? = ${product}`;
+
+                    // Generate answer options (multipliers)
+                    const answers = [this.correctAnswer];
+                    while (answers.length < 4) {
+                        let wrongAnswer;
+                        const wrongType = Math.floor(Math.random() * 3);
+
+                        if (wrongType === 0) {
+                            // Adjacent multiplier
+                            wrongAnswer = multiplier + (Math.random() > 0.5 ? 1 : -1);
+                        } else if (wrongType === 1) {
+                            // Random multiplier from 1-10
+                            wrongAnswer = Math.floor(Math.random() * 10) + 1;
+                        } else {
+                            // Close but wrong
+                            wrongAnswer = multiplier + Math.floor(Math.random() * 5) - 2;
+                        }
+
+                        if (wrongAnswer > 0 && wrongAnswer <= 10 && wrongAnswer !== this.correctAnswer && !answers.includes(wrongAnswer)) {
+                            answers.push(wrongAnswer);
+                        }
                     }
+
+                    // Shuffle and update buttons
+                    answers.sort(() => Math.random() - 0.5);
+                    const buttons = document.querySelectorAll('.answer-btn');
+                    buttons.forEach((btn, index) => {
+                        btn.textContent = answers[index];
+                        btn.classList.remove('correct-answer', 'wrong-answer');
+                    });
                 }
-
-                // Shuffle answers
-                answers.sort(() => Math.random() - 0.5);
-
-                // Update buttons
-                const buttons = document.querySelectorAll('.answer-btn');
-                buttons.forEach((btn, index) => {
-                    btn.textContent = answers[index];
-                    btn.classList.remove('correct-answer', 'wrong-answer');
-                });
             }
 
             checkAnswer(answer) {
@@ -2869,6 +2974,10 @@
                 this.tableMastery = {};
 
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                });
+                document.querySelectorAll('.speed-mode-btn').forEach(btn => {
                     btn.style.pointerEvents = 'auto';
                     btn.style.opacity = '1';
                 });
