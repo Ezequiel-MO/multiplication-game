@@ -641,50 +641,6 @@
             transform: scale(0.96) translateZ(0);
         }
 
-        /* Start point indicator - shows where first tap was made */
-        .visual-cell.start-point {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            transform: scale(1.1) translateZ(0);
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
-            animation: startPointPulse 1s ease-in-out infinite;
-            z-index: 10;
-            position: relative;
-        }
-
-        @keyframes startPointPulse {
-            0%, 100% {
-                box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
-                transform: scale(1.1) translateZ(0);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(255, 215, 0, 1), inset 0 0 0 3px rgba(255, 255, 255, 0.7);
-                transform: scale(1.15) translateZ(0);
-            }
-        }
-
-        /* Tap instruction hint */
-        .tap-hint {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-align: center;
-            animation: tapHintBounce 2s ease-in-out infinite;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        @keyframes tapHintBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-
-        .tap-hint.waiting {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #333;
-        }
-
         .visual-cell.correct-area {
             background: linear-gradient(135deg, #4CAF50, #8BC34A);
             animation: areaPulse 0.5s ease;
@@ -697,8 +653,13 @@
         }
 
         .visual-cell.hint-cell {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.6), rgba(255, 152, 0, 0.6));
-            animation: hintPulse 1s ease-in-out infinite;
+            box-shadow: inset 0 0 0 3px rgba(255, 193, 7, 0.9);
+            animation: hintBorderPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes hintBorderPulse {
+            0%, 100% { box-shadow: inset 0 0 0 3px rgba(255, 193, 7, 0.9); }
+            50% { box-shadow: inset 0 0 0 3px rgba(255, 152, 0, 1); }
         }
 
         /* Optimized keyframes using transform for GPU acceleration */
@@ -1438,11 +1399,6 @@
                     <span class="factor" id="visual-height">0</span>
                     <span class="equals">=</span>
                     <span class="result" id="visual-area">0</span>
-                </div>
-
-                <!-- Tap instruction hint -->
-                <div id="tap-hint" class="tap-hint mb-3">
-                    👆 Toca una casella per començar
                 </div>
 
                 <!-- Visual Grid -->
@@ -2949,38 +2905,17 @@
                 this.targetFactor2 = 0;
                 this.targetProduct = 0;
 
-                // Selection state
+                // Selection state - simple tap-to-toggle + drag support
                 this.selectedCells = new Set();
-                this.isSelecting = false;
-                this.selectionStart = null;
-                this.selectionEnd = null;
-
-                // Tap-to-tap selection mode (kid-friendly)
-                this.tapMode = 'waiting_first'; // 'waiting_first', 'waiting_second', 'dragging'
-                this.firstTapCell = null;
                 this.isDragging = false;
-                this.dragThreshold = 10; // pixels to distinguish tap from drag
+                this.dragThreshold = 15; // pixels to distinguish tap from drag
                 this.touchStartPos = null;
-
-                // Mouse handling (for desktop click-to-click mode)
-                this.mouseStartPos = null;
-                this.isMouseDragging = false;
-
-                // Touch handling
-                this.touchStartCell = null;
+                this.lastToggledCell = null; // prevent toggling same cell multiple times in one drag
 
                 // Performance optimization: cache DOM references
                 this.gridElement = null;
                 this.cellElements = [];
                 this.displayElements = {};
-
-                // Throttle touch move updates for performance
-                this.lastTouchMoveTime = 0;
-                this.touchMoveThrottle = 16; // ~60fps
-                this.pendingUpdate = null;
-
-                // Track last selection bounds to avoid unnecessary repaints
-                this.lastSelectionBounds = null;
 
                 // Level progression
                 this.problemsPerLevel = 5;
@@ -3004,7 +2939,6 @@
             // Cache DOM elements for faster access
             cacheElements() {
                 this.gridElement = document.getElementById('visual-grid');
-                this.tapHintElement = document.getElementById('tap-hint');
                 this.displayElements = {
                     width: document.getElementById('visual-width'),
                     height: document.getElementById('visual-height'),
@@ -3160,6 +3094,72 @@
                 return this.cellElements[index];
             }
 
+            // Toggle a cell's selection state
+            toggleCell(cell) {
+                const index = parseInt(cell.dataset.index);
+
+                if (this.selectedCells.has(index)) {
+                    this.selectedCells.delete(index);
+                    cell.classList.remove('selected');
+                } else {
+                    this.selectedCells.add(index);
+                    cell.classList.add('selected');
+                }
+
+                this.lastToggledCell = index;
+                this.updateSelectionDisplay();
+            }
+
+            // Select a cell (add to selection, used during drag)
+            selectCell(cell) {
+                const index = parseInt(cell.dataset.index);
+
+                // Don't re-select the same cell during a drag
+                if (this.lastToggledCell === index) return;
+
+                if (!this.selectedCells.has(index)) {
+                    this.selectedCells.add(index);
+                    cell.classList.add('selected');
+                    this.lastToggledCell = index;
+                    this.updateSelectionDisplay();
+                }
+            }
+
+            // Update the width x height = area display based on selected cells
+            updateSelectionDisplay() {
+                const count = this.selectedCells.size;
+
+                // Try to detect rectangular selection for dimension display
+                if (count > 0) {
+                    const indices = Array.from(this.selectedCells).sort((a, b) => a - b);
+                    const rows = new Set();
+                    const cols = new Set();
+
+                    indices.forEach(idx => {
+                        rows.add(Math.floor(idx / this.gridSize.cols));
+                        cols.add(idx % this.gridSize.cols);
+                    });
+
+                    const width = cols.size;
+                    const height = rows.size;
+
+                    // Check if it forms a perfect rectangle
+                    if (width * height === count) {
+                        this.displayElements.width.textContent = width;
+                        this.displayElements.height.textContent = height;
+                    } else {
+                        // Not a rectangle, just show count
+                        this.displayElements.width.textContent = '?';
+                        this.displayElements.height.textContent = '?';
+                    }
+                    this.displayElements.area.textContent = count;
+                } else {
+                    this.displayElements.width.textContent = '0';
+                    this.displayElements.height.textContent = '0';
+                    this.displayElements.area.textContent = '0';
+                }
+            }
+
             handleTouchStart(e) {
                 if (e.touches.length !== 1) return;
                 e.preventDefault();
@@ -3172,30 +3172,10 @@
                 // Store touch start position for drag detection
                 this.touchStartPos = { x: touch.clientX, y: touch.clientY };
                 this.isDragging = false;
-                this.touchStartCell = cell;
+                this.lastToggledCell = null;
 
-                const cellCoords = {
-                    row: parseInt(cell.dataset.row),
-                    col: parseInt(cell.dataset.col)
-                };
-
-                if (this.tapMode === 'waiting_first') {
-                    // First tap - mark starting point
-                    this.firstTapCell = cellCoords;
-                    this.selectionStart = cellCoords;
-                    this.selectionEnd = { ...cellCoords };
-                    this.isSelecting = true;
-
-                    // Visual feedback for start point
-                    cell.classList.add('start-point');
-                    this.updateTapHint('waiting_second');
-                    this.scheduleSelectionUpdate();
-                } else if (this.tapMode === 'waiting_second') {
-                    // Second tap - complete selection
-                    this.selectionEnd = cellCoords;
-                    this.isSelecting = true;
-                    this.scheduleSelectionUpdate();
-                }
+                // Toggle the cell immediately for responsive feedback
+                this.toggleCell(cell);
             }
 
             handleTouchMove(e) {
@@ -3204,7 +3184,7 @@
 
                 const touch = e.touches[0];
 
-                // Detect if user is dragging (moved beyond threshold)
+                // Detect if user started dragging
                 if (this.touchStartPos && !this.isDragging) {
                     const dx = touch.clientX - this.touchStartPos.x;
                     const dy = touch.clientY - this.touchStartPos.y;
@@ -3212,294 +3192,69 @@
 
                     if (distance > this.dragThreshold) {
                         this.isDragging = true;
-                        // If in waiting_second mode but user starts dragging, stay in that mode
-                        // and update the selection end point
-                        if (this.tapMode === 'waiting_first') {
-                            // Started dragging from first tap - switch to drag mode
-                            this.tapMode = 'dragging';
-                        }
                     }
                 }
 
-                // If dragging or in waiting_second mode, update selection preview
-                if (this.isDragging || this.tapMode === 'waiting_second') {
-                    // Throttle updates for performance
-                    const now = performance.now();
-                    if (now - this.lastTouchMoveTime < this.touchMoveThrottle) {
-                        if (!this.pendingUpdate) {
-                            this.pendingUpdate = requestAnimationFrame(() => {
-                                this.pendingUpdate = null;
-                                this.processTouchMove(e.touches[0]);
-                            });
-                        }
-                        return;
-                    }
-                    this.lastTouchMoveTime = now;
-                    this.processTouchMove(touch);
-                }
-            }
-
-            processTouchMove(touch) {
-                const cell = this.getCellFromPoint(touch.clientX, touch.clientY);
-
-                if (cell) {
-                    const newEnd = {
-                        row: parseInt(cell.dataset.row),
-                        col: parseInt(cell.dataset.col)
-                    };
-
-                    // Only update if selection has actually changed
-                    if (!this.selectionEnd ||
-                        newEnd.row !== this.selectionEnd.row ||
-                        newEnd.col !== this.selectionEnd.col) {
-                        this.selectionEnd = newEnd;
-                        this.scheduleSelectionUpdate();
+                // If dragging, select cells as finger moves over them
+                if (this.isDragging) {
+                    const cell = this.getCellFromPoint(touch.clientX, touch.clientY);
+                    if (cell) {
+                        this.selectCell(cell);
                     }
                 }
             }
 
             handleTouchEnd(e) {
-                // Cancel any pending updates
-                if (this.pendingUpdate) {
-                    cancelAnimationFrame(this.pendingUpdate);
-                    this.pendingUpdate = null;
-                }
-
-                if (this.tapMode === 'waiting_first' && !this.isDragging) {
-                    // First tap completed (no drag) - wait for second tap
-                    this.tapMode = 'waiting_second';
-                    // Keep showing preview of single cell selection
-                } else if (this.tapMode === 'waiting_second' && !this.isDragging) {
-                    // Second tap completed - finalize selection
-                    this.finalizeSelection();
-                    this.resetTapMode();
-                } else if (this.tapMode === 'dragging' || this.isDragging) {
-                    // Drag completed - finalize selection
-                    if (this.isSelecting) {
-                        this.finalizeSelection();
-                    }
-                    this.resetTapMode();
-                }
-
-                this.isSelecting = false;
                 this.isDragging = false;
                 this.touchStartPos = null;
-            }
-
-            // Update tap hint UI based on current mode
-            updateTapHint(mode) {
-                if (!this.tapHintElement) return;
-
-                if (mode === 'waiting_first') {
-                    this.tapHintElement.textContent = '👆 Toca una casella per començar';
-                    this.tapHintElement.classList.remove('waiting');
-                } else if (mode === 'waiting_second') {
-                    this.tapHintElement.textContent = '👆 Ara toca l\'altra cantonada!';
-                    this.tapHintElement.classList.add('waiting');
-                }
-            }
-
-            // Reset tap mode to initial state
-            resetTapMode() {
-                this.tapMode = 'waiting_first';
-                this.firstTapCell = null;
-                this.updateTapHint('waiting_first');
-
-                // Remove start-point class from all cells
-                this.cellElements.forEach(cell => {
-                    cell.classList.remove('start-point');
-                });
+                this.lastToggledCell = null;
             }
 
             handleMouseDown(e) {
                 const cell = e.target.closest('.visual-cell');
                 if (!cell) return;
 
-                this.mouseStartPos = { x: e.clientX, y: e.clientY };
-                this.isMouseDragging = false;
+                this.touchStartPos = { x: e.clientX, y: e.clientY };
+                this.isDragging = false;
+                this.lastToggledCell = null;
 
-                const cellCoords = {
-                    row: parseInt(cell.dataset.row),
-                    col: parseInt(cell.dataset.col)
-                };
-
-                if (this.tapMode === 'waiting_first') {
-                    // First click - mark starting point
-                    this.firstTapCell = cellCoords;
-                    this.selectionStart = cellCoords;
-                    this.selectionEnd = { ...cellCoords };
-                    this.isSelecting = true;
-
-                    // Visual feedback for start point
-                    cell.classList.add('start-point');
-                    this.updateTapHint('waiting_second');
-                    this.scheduleSelectionUpdate();
-                } else if (this.tapMode === 'waiting_second') {
-                    // Second click - complete selection
-                    this.selectionEnd = cellCoords;
-                    this.isSelecting = true;
-                    this.scheduleSelectionUpdate();
-                }
+                // Toggle the cell immediately
+                this.toggleCell(cell);
             }
 
             handleMouseMove(e) {
-                if (!this.selectionStart) return;
+                if (!this.touchStartPos) return;
 
-                // Detect if user is dragging
-                if (this.mouseStartPos && !this.isMouseDragging) {
-                    const dx = e.clientX - this.mouseStartPos.x;
-                    const dy = e.clientY - this.mouseStartPos.y;
+                // Detect if user started dragging
+                if (!this.isDragging) {
+                    const dx = e.clientX - this.touchStartPos.x;
+                    const dy = e.clientY - this.touchStartPos.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance > this.dragThreshold) {
-                        this.isMouseDragging = true;
-                        if (this.tapMode === 'waiting_first') {
-                            this.tapMode = 'dragging';
-                        }
+                        this.isDragging = true;
                     }
                 }
 
-                // Update preview during drag or when waiting for second click
-                if (this.isMouseDragging || this.tapMode === 'waiting_second') {
+                // If dragging, select cells as mouse moves over them
+                if (this.isDragging) {
                     const cell = e.target.closest('.visual-cell');
                     if (cell) {
-                        const newEnd = {
-                            row: parseInt(cell.dataset.row),
-                            col: parseInt(cell.dataset.col)
-                        };
-
-                        if (!this.selectionEnd ||
-                            newEnd.row !== this.selectionEnd.row ||
-                            newEnd.col !== this.selectionEnd.col) {
-                            this.selectionEnd = newEnd;
-                            this.scheduleSelectionUpdate();
-                        }
+                        this.selectCell(cell);
                     }
                 }
             }
 
             handleMouseUp(e) {
-                if (this.tapMode === 'waiting_first' && !this.isMouseDragging) {
-                    // First click completed - wait for second click
-                    this.tapMode = 'waiting_second';
-                } else if (this.tapMode === 'waiting_second' && !this.isMouseDragging) {
-                    // Second click completed - finalize selection
-                    this.finalizeSelection();
-                    this.resetTapMode();
-                } else if (this.tapMode === 'dragging' || this.isMouseDragging) {
-                    // Drag completed - finalize selection
-                    if (this.isSelecting) {
-                        this.finalizeSelection();
-                    }
-                    this.resetTapMode();
-                }
-
-                this.isSelecting = false;
-                this.isMouseDragging = false;
-                this.mouseStartPos = null;
-            }
-
-            // Schedule selection update using requestAnimationFrame
-            scheduleSelectionUpdate() {
-                if (!this.pendingUpdate) {
-                    this.pendingUpdate = requestAnimationFrame(() => {
-                        this.pendingUpdate = null;
-                        this.updateSelectionPreview();
-                    });
-                }
-            }
-
-            updateSelectionPreview() {
-                if (!this.selectionStart || !this.selectionEnd) return;
-
-                const minRow = Math.min(this.selectionStart.row, this.selectionEnd.row);
-                const maxRow = Math.max(this.selectionStart.row, this.selectionEnd.row);
-                const minCol = Math.min(this.selectionStart.col, this.selectionEnd.col);
-                const maxCol = Math.max(this.selectionStart.col, this.selectionEnd.col);
-
-                // Check if bounds have changed
-                const currentBounds = `${minRow}-${maxRow}-${minCol}-${maxCol}`;
-                if (this.lastSelectionBounds === currentBounds) {
-                    return; // No change, skip repaint
-                }
-                this.lastSelectionBounds = currentBounds;
-
-                const width = maxCol - minCol + 1;
-                const height = maxRow - minRow + 1;
-
-                // Batch DOM updates using cached elements
-                // First pass: remove classes from all cells (except start-point during selection)
-                const cellCount = this.cellElements.length;
-                for (let i = 0; i < cellCount; i++) {
-                    const cell = this.cellElements[i];
-                    cell.classList.remove('preview', 'selected');
-                    // Keep start-point class during tap-to-tap selection
-                    if (this.tapMode !== 'waiting_second') {
-                        cell.classList.remove('start-point');
-                    }
-                    cell.style.transform = '';
-                }
-
-                // Second pass: add preview class to selected cells
-                for (let row = minRow; row <= maxRow; row++) {
-                    for (let col = minCol; col <= maxCol; col++) {
-                        const cell = this.getCellByCoords(row, col);
-                        if (cell) {
-                            cell.classList.add('preview');
-                        }
-                    }
-                }
-
-                // Update dimension display using cached elements
-                this.displayElements.width.textContent = width;
-                this.displayElements.height.textContent = height;
-                this.displayElements.area.textContent = width * height;
-            }
-
-            finalizeSelection() {
-                if (!this.selectionStart || !this.selectionEnd) return;
-
-                const minRow = Math.min(this.selectionStart.row, this.selectionEnd.row);
-                const maxRow = Math.max(this.selectionStart.row, this.selectionEnd.row);
-                const minCol = Math.min(this.selectionStart.col, this.selectionEnd.col);
-                const maxCol = Math.max(this.selectionStart.col, this.selectionEnd.col);
-
-                this.selectedCells.clear();
-
-                // Use cached cell elements for O(1) access
-                for (let row = minRow; row <= maxRow; row++) {
-                    for (let col = minCol; col <= maxCol; col++) {
-                        const index = row * this.gridSize.cols + col;
-                        this.selectedCells.add(index);
-                        const cell = this.cellElements[index];
-                        if (cell) {
-                            cell.classList.remove('preview');
-                            cell.classList.add('selected');
-                            cell.style.transform = '';
-                        }
-                    }
-                }
-
-                // Store selection bounds
-                this.currentSelection = {
-                    width: maxCol - minCol + 1,
-                    height: maxRow - minRow + 1,
-                    area: this.selectedCells.size
-                };
-
-                // Reset bounds tracking
-                this.lastSelectionBounds = null;
+                this.isDragging = false;
+                this.touchStartPos = null;
+                this.lastToggledCell = null;
             }
 
             clearSelection() {
                 this.selectedCells.clear();
-                this.selectionStart = null;
-                this.selectionEnd = null;
-                this.currentSelection = null;
-                this.lastSelectionBounds = null;
-
-                // Reset tap mode for kid-friendly selection
-                this.resetTapMode();
+                this.isDragging = false;
+                this.lastToggledCell = null;
 
                 // Use cached cell elements - much faster than querySelectorAll
                 const cellCount = this.cellElements.length;
@@ -3508,7 +3263,6 @@
                     cell.className = 'visual-cell'; // Reset all classes at once
                     cell.textContent = '';
                     cell.style.color = '';
-                    cell.style.transform = '';
                 }
 
                 // Use cached display elements
@@ -3547,26 +3301,42 @@
             }
 
             checkAnswer() {
-                if (!this.currentSelection || this.selectedCells.size === 0) {
-                    this.showMessage('Dibuixa un rectangle primer!', 'warning');
+                if (this.selectedCells.size === 0) {
+                    this.showMessage('Toca caselles primer!', 'warning');
                     return;
                 }
 
-                const { width, height, area } = this.currentSelection;
+                const count = this.selectedCells.size;
+
+                // Calculate dimensions from selected cells
+                const indices = Array.from(this.selectedCells);
+                const rows = new Set();
+                const cols = new Set();
+
+                indices.forEach(idx => {
+                    rows.add(Math.floor(idx / this.gridSize.cols));
+                    cols.add(idx % this.gridSize.cols);
+                });
+
+                const width = cols.size;
+                const height = rows.size;
+                const isRectangle = width * height === count;
 
                 let isCorrect = false;
 
                 if (this.mode === 'explore') {
-                    // Must match exact dimensions
-                    isCorrect = (width === this.targetFactor1 && height === this.targetFactor2) ||
-                                (width === this.targetFactor2 && height === this.targetFactor1);
+                    // Must match exact dimensions and be a rectangle
+                    isCorrect = isRectangle && (
+                        (width === this.targetFactor1 && height === this.targetFactor2) ||
+                        (width === this.targetFactor2 && height === this.targetFactor1)
+                    );
                 } else {
-                    // Just needs correct area (any valid factor pair)
-                    isCorrect = area === this.targetProduct;
+                    // Just needs correct count (area)
+                    isCorrect = count === this.targetProduct;
                 }
 
                 if (isCorrect) {
-                    this.handleCorrectAnswer(width, height, area);
+                    this.handleCorrectAnswer(width, height, count);
                 } else {
                     this.handleIncorrectAnswer();
                 }
@@ -3646,13 +3416,11 @@
                 this.hintsLeft--;
                 this.displayElements.hintsLeft.textContent = this.hintsLeft;
 
-                // Show a valid rectangle outline
-                this.clearSelection();
-
                 const factor1 = this.targetFactor1;
                 const factor2 = this.targetFactor2;
 
-                // Highlight cells that would form a valid rectangle using cached cells
+                // Show border outline on cells that would form a valid rectangle
+                // Kids still need to tap on these cells to select them!
                 const hintCellIndices = [];
                 for (let row = 0; row < factor2; row++) {
                     for (let col = 0; col < factor1; col++) {
@@ -3665,14 +3433,7 @@
                     }
                 }
 
-                // Update dimension display using cached elements
-                this.displayElements.width.textContent = factor1;
-                this.displayElements.height.textContent = factor2;
-                this.displayElements.area.textContent = factor1 * factor2;
-
-                playSound('applause');
-
-                // Clear hint after 2 seconds using cached indices
+                // Clear hint borders after 5 seconds (give kids time to tap)
                 setTimeout(() => {
                     hintCellIndices.forEach(index => {
                         const cell = this.cellElements[index];
@@ -3680,10 +3441,7 @@
                             cell.classList.remove('hint-cell');
                         }
                     });
-                    this.displayElements.width.textContent = '0';
-                    this.displayElements.height.textContent = '0';
-                    this.displayElements.area.textContent = '0';
-                }, 2000);
+                }, 5000);
             }
 
             skipProblem() {
