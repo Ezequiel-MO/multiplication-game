@@ -641,6 +641,50 @@
             transform: scale(0.96) translateZ(0);
         }
 
+        /* Start point indicator - shows where first tap was made */
+        .visual-cell.start-point {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            transform: scale(1.1) translateZ(0);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+            animation: startPointPulse 1s ease-in-out infinite;
+            z-index: 10;
+            position: relative;
+        }
+
+        @keyframes startPointPulse {
+            0%, 100% {
+                box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+                transform: scale(1.1) translateZ(0);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 1), inset 0 0 0 3px rgba(255, 255, 255, 0.7);
+                transform: scale(1.15) translateZ(0);
+            }
+        }
+
+        /* Tap instruction hint */
+        .tap-hint {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            animation: tapHintBounce 2s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes tapHintBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .tap-hint.waiting {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
         .visual-cell.correct-area {
             background: linear-gradient(135deg, #4CAF50, #8BC34A);
             animation: areaPulse 0.5s ease;
@@ -1394,6 +1438,11 @@
                     <span class="factor" id="visual-height">0</span>
                     <span class="equals">=</span>
                     <span class="result" id="visual-area">0</span>
+                </div>
+
+                <!-- Tap instruction hint -->
+                <div id="tap-hint" class="tap-hint mb-3">
+                    👆 Toca una casella per començar
                 </div>
 
                 <!-- Visual Grid -->
@@ -2906,6 +2955,17 @@
                 this.selectionStart = null;
                 this.selectionEnd = null;
 
+                // Tap-to-tap selection mode (kid-friendly)
+                this.tapMode = 'waiting_first'; // 'waiting_first', 'waiting_second', 'dragging'
+                this.firstTapCell = null;
+                this.isDragging = false;
+                this.dragThreshold = 10; // pixels to distinguish tap from drag
+                this.touchStartPos = null;
+
+                // Mouse handling (for desktop click-to-click mode)
+                this.mouseStartPos = null;
+                this.isMouseDragging = false;
+
                 // Touch handling
                 this.touchStartCell = null;
 
@@ -2944,6 +3004,7 @@
             // Cache DOM elements for faster access
             cacheElements() {
                 this.gridElement = document.getElementById('visual-grid');
+                this.tapHintElement = document.getElementById('tap-hint');
                 this.displayElements = {
                     width: document.getElementById('visual-width'),
                     height: document.getElementById('visual-height'),
@@ -3106,37 +3167,76 @@
                 const touch = e.touches[0];
                 const cell = this.getCellFromPoint(touch.clientX, touch.clientY);
 
-                if (cell) {
+                if (!cell) return;
+
+                // Store touch start position for drag detection
+                this.touchStartPos = { x: touch.clientX, y: touch.clientY };
+                this.isDragging = false;
+                this.touchStartCell = cell;
+
+                const cellCoords = {
+                    row: parseInt(cell.dataset.row),
+                    col: parseInt(cell.dataset.col)
+                };
+
+                if (this.tapMode === 'waiting_first') {
+                    // First tap - mark starting point
+                    this.firstTapCell = cellCoords;
+                    this.selectionStart = cellCoords;
+                    this.selectionEnd = { ...cellCoords };
                     this.isSelecting = true;
-                    this.selectionStart = {
-                        row: parseInt(cell.dataset.row),
-                        col: parseInt(cell.dataset.col)
-                    };
-                    this.selectionEnd = { ...this.selectionStart };
-                    // Provide immediate haptic-like visual feedback
-                    cell.style.transform = 'scale(0.9) translateZ(0)';
+
+                    // Visual feedback for start point
+                    cell.classList.add('start-point');
+                    this.updateTapHint('waiting_second');
+                    this.scheduleSelectionUpdate();
+                } else if (this.tapMode === 'waiting_second') {
+                    // Second tap - complete selection
+                    this.selectionEnd = cellCoords;
+                    this.isSelecting = true;
                     this.scheduleSelectionUpdate();
                 }
             }
 
             handleTouchMove(e) {
-                if (!this.isSelecting || e.touches.length !== 1) return;
+                if (e.touches.length !== 1) return;
                 e.preventDefault();
 
-                // Throttle updates for performance on lower-end devices
-                const now = performance.now();
-                if (now - this.lastTouchMoveTime < this.touchMoveThrottle) {
-                    // Schedule an update for the end of the throttle period
-                    if (!this.pendingUpdate) {
-                        this.pendingUpdate = requestAnimationFrame(() => {
-                            this.pendingUpdate = null;
-                            this.processTouchMove(e.touches[0]);
-                        });
+                const touch = e.touches[0];
+
+                // Detect if user is dragging (moved beyond threshold)
+                if (this.touchStartPos && !this.isDragging) {
+                    const dx = touch.clientX - this.touchStartPos.x;
+                    const dy = touch.clientY - this.touchStartPos.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance > this.dragThreshold) {
+                        this.isDragging = true;
+                        // If in waiting_second mode but user starts dragging, stay in that mode
+                        // and update the selection end point
+                        if (this.tapMode === 'waiting_first') {
+                            // Started dragging from first tap - switch to drag mode
+                            this.tapMode = 'dragging';
+                        }
                     }
-                    return;
                 }
-                this.lastTouchMoveTime = now;
-                this.processTouchMove(e.touches[0]);
+
+                // If dragging or in waiting_second mode, update selection preview
+                if (this.isDragging || this.tapMode === 'waiting_second') {
+                    // Throttle updates for performance
+                    const now = performance.now();
+                    if (now - this.lastTouchMoveTime < this.touchMoveThrottle) {
+                        if (!this.pendingUpdate) {
+                            this.pendingUpdate = requestAnimationFrame(() => {
+                                this.pendingUpdate = null;
+                                this.processTouchMove(e.touches[0]);
+                            });
+                        }
+                        return;
+                    }
+                    this.lastTouchMoveTime = now;
+                    this.processTouchMove(touch);
+                }
             }
 
             processTouchMove(touch) {
@@ -3165,50 +3265,138 @@
                     this.pendingUpdate = null;
                 }
 
-                if (this.isSelecting) {
+                if (this.tapMode === 'waiting_first' && !this.isDragging) {
+                    // First tap completed (no drag) - wait for second tap
+                    this.tapMode = 'waiting_second';
+                    // Keep showing preview of single cell selection
+                } else if (this.tapMode === 'waiting_second' && !this.isDragging) {
+                    // Second tap completed - finalize selection
                     this.finalizeSelection();
+                    this.resetTapMode();
+                } else if (this.tapMode === 'dragging' || this.isDragging) {
+                    // Drag completed - finalize selection
+                    if (this.isSelecting) {
+                        this.finalizeSelection();
+                    }
+                    this.resetTapMode();
                 }
+
                 this.isSelecting = false;
+                this.isDragging = false;
+                this.touchStartPos = null;
+            }
+
+            // Update tap hint UI based on current mode
+            updateTapHint(mode) {
+                if (!this.tapHintElement) return;
+
+                if (mode === 'waiting_first') {
+                    this.tapHintElement.textContent = '👆 Toca una casella per començar';
+                    this.tapHintElement.classList.remove('waiting');
+                } else if (mode === 'waiting_second') {
+                    this.tapHintElement.textContent = '👆 Ara toca l\'altra cantonada!';
+                    this.tapHintElement.classList.add('waiting');
+                }
+            }
+
+            // Reset tap mode to initial state
+            resetTapMode() {
+                this.tapMode = 'waiting_first';
+                this.firstTapCell = null;
+                this.updateTapHint('waiting_first');
+
+                // Remove start-point class from all cells
+                this.cellElements.forEach(cell => {
+                    cell.classList.remove('start-point');
+                });
             }
 
             handleMouseDown(e) {
                 const cell = e.target.closest('.visual-cell');
                 if (!cell) return;
 
-                this.isSelecting = true;
-                this.selectionStart = {
+                this.mouseStartPos = { x: e.clientX, y: e.clientY };
+                this.isMouseDragging = false;
+
+                const cellCoords = {
                     row: parseInt(cell.dataset.row),
                     col: parseInt(cell.dataset.col)
                 };
-                this.selectionEnd = { ...this.selectionStart };
-                this.scheduleSelectionUpdate();
+
+                if (this.tapMode === 'waiting_first') {
+                    // First click - mark starting point
+                    this.firstTapCell = cellCoords;
+                    this.selectionStart = cellCoords;
+                    this.selectionEnd = { ...cellCoords };
+                    this.isSelecting = true;
+
+                    // Visual feedback for start point
+                    cell.classList.add('start-point');
+                    this.updateTapHint('waiting_second');
+                    this.scheduleSelectionUpdate();
+                } else if (this.tapMode === 'waiting_second') {
+                    // Second click - complete selection
+                    this.selectionEnd = cellCoords;
+                    this.isSelecting = true;
+                    this.scheduleSelectionUpdate();
+                }
             }
 
             handleMouseMove(e) {
-                if (!this.isSelecting) return;
+                if (!this.selectionStart) return;
 
-                const cell = e.target.closest('.visual-cell');
-                if (cell) {
-                    const newEnd = {
-                        row: parseInt(cell.dataset.row),
-                        col: parseInt(cell.dataset.col)
-                    };
+                // Detect if user is dragging
+                if (this.mouseStartPos && !this.isMouseDragging) {
+                    const dx = e.clientX - this.mouseStartPos.x;
+                    const dy = e.clientY - this.mouseStartPos.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // Only update if selection has actually changed
-                    if (!this.selectionEnd ||
-                        newEnd.row !== this.selectionEnd.row ||
-                        newEnd.col !== this.selectionEnd.col) {
-                        this.selectionEnd = newEnd;
-                        this.scheduleSelectionUpdate();
+                    if (distance > this.dragThreshold) {
+                        this.isMouseDragging = true;
+                        if (this.tapMode === 'waiting_first') {
+                            this.tapMode = 'dragging';
+                        }
+                    }
+                }
+
+                // Update preview during drag or when waiting for second click
+                if (this.isMouseDragging || this.tapMode === 'waiting_second') {
+                    const cell = e.target.closest('.visual-cell');
+                    if (cell) {
+                        const newEnd = {
+                            row: parseInt(cell.dataset.row),
+                            col: parseInt(cell.dataset.col)
+                        };
+
+                        if (!this.selectionEnd ||
+                            newEnd.row !== this.selectionEnd.row ||
+                            newEnd.col !== this.selectionEnd.col) {
+                            this.selectionEnd = newEnd;
+                            this.scheduleSelectionUpdate();
+                        }
                     }
                 }
             }
 
             handleMouseUp(e) {
-                if (this.isSelecting) {
+                if (this.tapMode === 'waiting_first' && !this.isMouseDragging) {
+                    // First click completed - wait for second click
+                    this.tapMode = 'waiting_second';
+                } else if (this.tapMode === 'waiting_second' && !this.isMouseDragging) {
+                    // Second click completed - finalize selection
                     this.finalizeSelection();
+                    this.resetTapMode();
+                } else if (this.tapMode === 'dragging' || this.isMouseDragging) {
+                    // Drag completed - finalize selection
+                    if (this.isSelecting) {
+                        this.finalizeSelection();
+                    }
+                    this.resetTapMode();
                 }
+
                 this.isSelecting = false;
+                this.isMouseDragging = false;
+                this.mouseStartPos = null;
             }
 
             // Schedule selection update using requestAnimationFrame
@@ -3240,11 +3428,15 @@
                 const height = maxRow - minRow + 1;
 
                 // Batch DOM updates using cached elements
-                // First pass: remove classes from all cells
+                // First pass: remove classes from all cells (except start-point during selection)
                 const cellCount = this.cellElements.length;
                 for (let i = 0; i < cellCount; i++) {
                     const cell = this.cellElements[i];
                     cell.classList.remove('preview', 'selected');
+                    // Keep start-point class during tap-to-tap selection
+                    if (this.tapMode !== 'waiting_second') {
+                        cell.classList.remove('start-point');
+                    }
                     cell.style.transform = '';
                 }
 
@@ -3305,6 +3497,9 @@
                 this.selectionEnd = null;
                 this.currentSelection = null;
                 this.lastSelectionBounds = null;
+
+                // Reset tap mode for kid-friendly selection
+                this.resetTapMode();
 
                 // Use cached cell elements - much faster than querySelectorAll
                 const cellCount = this.cellElements.length;
