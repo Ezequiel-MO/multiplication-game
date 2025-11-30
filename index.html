@@ -19,13 +19,13 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
-        
+
         .game-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
-        
+
         .number-cell {
             transition: all 0.3s ease;
             border-radius: 8px;
@@ -47,40 +47,40 @@
         .number-cell:active {
             transform: scale(0.95);
         }
-        
+
         .number-cell.correct {
             background: linear-gradient(45deg, #4CAF50, #8BC34A) !important;
             color: white !important;
             animation: correctPulse 0.6s ease;
             box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         }
-        
+
         .number-cell.incorrect {
             background: linear-gradient(45deg, #FF6B6B, #FF8E8E) !important;
             color: white !important;
             animation: shake 0.5s ease;
             box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
         }
-        
+
         .number-cell.completed {
             background: linear-gradient(45deg, #4CAF50, #8BC34A) !important;
             color: white !important;
             animation: celebrate 0.8s ease;
             box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         }
-        
+
         @keyframes correctPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
-        
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-        
+
         @keyframes celebrate {
             0% { transform: scale(1) rotate(0deg); }
             50% { transform: scale(1.3) rotate(180deg); }
@@ -116,6 +116,28 @@
             }
         }
 
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+        }
+
+        @keyframes slide-up {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            70% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
         #equation-display.show {
             animation: equationPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
@@ -127,7 +149,7 @@
         #equation-display-card {
             transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-        
+
         .selector-btn {
             transition: all 0.3s ease;
             border-radius: 12px;
@@ -156,7 +178,7 @@
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        
+
         .celebration-overlay {
             position: fixed;
             top: 0;
@@ -167,7 +189,7 @@
             display: none;
             z-index: 1000;
         }
-        
+
         .confetti {
             position: absolute;
             width: 10px;
@@ -175,7 +197,7 @@
             background: #FFD700;
             animation: confetti-fall 3s linear infinite;
         }
-        
+
         @keyframes confetti-fall {
             0% {
                 transform: translateY(-100vh) rotate(0deg);
@@ -186,12 +208,83 @@
                 opacity: 0;
             }
         }
-        
+
         .progress-bar {
             background: linear-gradient(90deg, #4CAF50, #8BC34A);
             border-radius: 10px;
             transition: width 0.5s ease;
         }
+
+        /* Menu styles */
+        .menu-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+        }
+
+        .game-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Speed game styles */
+        .answer-btn {
+            transition: all 0.2s ease;
+            min-height: 60px;
+        }
+
+        .answer-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .answer-btn:active {
+            transform: scale(0.95);
+        }
+
+        .answer-btn.correct-answer {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A) !important;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .answer-btn.wrong-answer {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E) !important;
+            animation: shake 0.5s ease;
+        }
+
+        .timer-bar {
+            transition: width 0.1s linear;
+        }
+
+        .timer-bar.warning {
+            background: linear-gradient(90deg, #FF6B6B, #FF8E8E) !important;
+        }
+
+        .streak-badge {
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
+
+        .points-popup {
+            animation: slide-up 0.6s ease forwards;
+            pointer-events: none;
+        }
+
+        /* Stars animation */
+        .star {
+            display: inline-block;
+            animation: bounce-in 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .star:nth-child(1) { animation-delay: 0.1s; }
+        .star:nth-child(2) { animation-delay: 0.2s; }
+        .star:nth-child(3) { animation-delay: 0.3s; }
 
         /* Mobile-specific optimizations */
         @media (max-width: 640px) {
@@ -226,6 +319,15 @@
             .celebration-content {
                 max-width: 90% !important;
                 padding: 1.5rem !important;
+            }
+
+            .menu-card {
+                padding: 1rem !important;
+            }
+
+            .answer-btn {
+                min-height: 50px;
+                font-size: 1.25rem !important;
             }
         }
 
@@ -268,87 +370,278 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
-    <!-- Reset Button at Top -->
-    <div class="fixed top-2 right-2 sm:top-4 sm:right-4 z-40">
-        <button id="reset-btn" class="bg-white text-purple-600 px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-base">
-            🔄 Nou Joc
-        </button>
-    </div>
 
-    <!-- Main Game Container -->
-    <div class="container mx-auto px-2 py-2 max-w-md sm:px-4 sm:py-6">
-        <!-- Header -->
-        <div class="text-center mb-2 sm:mb-6">
-            <h1 class="text-xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">🎯 Multiplicacions</h1>
-            <p class="text-white text-xs sm:text-lg opacity-90 hidden sm:block">Aprèn les Taules Multiplicant Jugant!</p>
-        </div>
-        
-        <!-- Game Card -->
-        <div class="game-container p-3 sm:p-6 mb-2 sm:mb-6">
-            <!-- Number Selector -->
-            <div class="mb-2 sm:mb-6">
-                <h2 class="text-sm sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 text-center">📝 Tria Taula</h2>
-                <div class="grid grid-cols-5 gap-1.5 sm:gap-3" id="number-selector">
-                    <button class="selector-btn bg-blue-100 text-blue-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="1">1</button>
-                    <button class="selector-btn bg-green-100 text-green-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="2">2</button>
-                    <button class="selector-btn bg-yellow-100 text-yellow-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="3">3</button>
-                    <button class="selector-btn bg-purple-100 text-purple-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="4">4</button>
-                    <button class="selector-btn bg-red-100 text-red-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="5">5</button>
-                    <button class="selector-btn bg-indigo-100 text-indigo-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="6">6</button>
-                    <button class="selector-btn bg-pink-100 text-pink-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="7">7</button>
-                    <button class="selector-btn bg-orange-100 text-orange-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="8">8</button>
-                    <button class="selector-btn bg-teal-100 text-teal-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="9">9</button>
-                    <button class="selector-btn bg-gray-100 text-gray-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="10">10</button>
-                </div>
-            </div>
-            
-            <!-- Progress Bar -->
-            <div class="mb-2 sm:mb-6">
-                <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
-                    <span>Progrés</span>
-                    <span id="progress-text">0/0</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3">
-                    <div id="progress-bar" class="progress-bar h-2 sm:h-3 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- Number Grid -->
-            <div id="number-grid" class="grid grid-cols-10 gap-1 sm:gap-2 mb-2 sm:mb-4">
-                <!-- Grid cells will be generated by JavaScript -->
-            </div>
-            
-            <!-- Instructions -->
-            <div class="text-center text-gray-600 text-xs leading-relaxed hidden sm:block">
-                <p>🎯 Toca tots els múltiples del nombre seleccionat!</p>
-                <p class="mt-1">✅ Correctes verdes, ❌ Incorrectes vermelles</p>
-            </div>
+    <!-- ==================== MAIN MENU ==================== -->
+    <div id="main-menu" class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl sm:text-5xl font-bold text-white mb-2 drop-shadow-lg">🎮 Mestre de Multiplicacions</h1>
+            <p class="text-white text-sm sm:text-xl opacity-90">Tria un joc i aprèn les taules!</p>
         </div>
 
-        <!-- Equation Display Below Grid -->
-        <div id="equation-container" class="mt-3 sm:mt-4" style="display: none;">
-            <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-8 sm:py-6 shadow-2xl border-4 border-white transform scale-0" id="equation-display-card">
-                <div class="text-white text-center">
-                    <div class="text-3xl sm:text-5xl md:text-6xl font-bold" id="equation-text-inline">6 × 4 = 24</div>
+        <div class="grid gap-4 sm:gap-6">
+            <!-- Game 1: Multiple Hunter -->
+            <div class="menu-card game-container p-4 sm:p-6" onclick="startGame('hunter')">
+                <div class="flex items-center gap-4">
+                    <div class="game-icon text-4xl sm:text-6xl">🎯</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Caçador de Múltiples</h2>
+                        <p class="text-gray-600 text-sm sm:text-base">Troba tots els múltiples d'un nombre a la graella!</p>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">Puntuació</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">Nivells</span>
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold">Rècords</span>
+                        </div>
+                    </div>
+                    <div class="text-3xl">▶️</div>
+                </div>
+            </div>
+
+            <!-- Game 2: Speed Challenge -->
+            <div class="menu-card game-container p-4 sm:p-6" onclick="startGame('speed')">
+                <div class="flex items-center gap-4">
+                    <div class="game-icon text-4xl sm:text-6xl" style="animation-delay: 0.5s;">⚡</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Repte de Velocitat</h2>
+                        <p class="text-gray-600 text-sm sm:text-base">Respon ràpid les multiplicacions abans que s'acabi el temps!</p>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-semibold">Cronòmetre</span>
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">Ratxa</span>
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">Estrelles</span>
+                        </div>
+                    </div>
+                    <div class="text-3xl">▶️</div>
+                </div>
+            </div>
+
+            <!-- High Scores Display -->
+            <div class="game-container p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 text-center">🏆 Millors Puntuacions</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-purple-600" id="hunter-highscore">0</div>
+                        <div class="text-gray-600 text-sm">Caçador</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-orange-600" id="speed-highscore">0</div>
+                        <div class="text-gray-600 text-sm">Velocitat</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Celebration Overlay -->
-    <div id="celebration-overlay" class="celebration-overlay">
-        <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto transform scale-0" id="celebration-content">
-                <div class="text-5xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Felicitats!</h2>
-                <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Has dominat la taula del <span id="completed-table" class="font-bold text-purple-600"></span>!</p>
-                <button id="continue-btn" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:shadow-lg active:scale-95 transition-all duration-300 text-sm sm:text-base">
-                    🎮 Juga Altra Vegada
-                </button>
+
+    <!-- ==================== GAME 1: MULTIPLE HUNTER ==================== -->
+    <div id="hunter-game" style="display: none;">
+        <!-- Back to Menu Button -->
+        <div class="fixed top-2 left-2 sm:top-4 sm:left-4 z-40">
+            <button onclick="showMenu()" class="bg-white text-purple-600 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-sm">
+                ◀️ Menú
+            </button>
+        </div>
+
+        <!-- Score Display -->
+        <div class="fixed top-2 right-16 sm:top-4 sm:right-28 z-40 bg-white px-3 py-2 rounded-full shadow-lg">
+            <span class="text-purple-600 font-bold text-sm sm:text-base">⭐ <span id="hunter-score">0</span></span>
+        </div>
+
+        <!-- Reset Button -->
+        <div class="fixed top-2 right-2 sm:top-4 sm:right-4 z-40">
+            <button id="reset-btn" class="bg-white text-purple-600 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-sm">
+                🔄 Nou
+            </button>
+        </div>
+
+        <!-- Main Game Container -->
+        <div class="container mx-auto px-2 py-2 max-w-md sm:px-4 sm:py-6">
+            <!-- Header -->
+            <div class="text-center mb-2 sm:mb-6">
+                <h1 class="text-xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">🎯 Caçador de Múltiples</h1>
+                <p class="text-white text-xs sm:text-lg opacity-90 hidden sm:block">Troba tots els múltiples!</p>
+            </div>
+
+            <!-- Game Card -->
+            <div class="game-container p-3 sm:p-6 mb-2 sm:mb-6">
+                <!-- Level and Combo Display -->
+                <div class="flex justify-between items-center mb-2 sm:mb-4">
+                    <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">
+                        Nivell: <span id="hunter-level">1</span>
+                    </div>
+                    <div id="combo-display" class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-bold" style="display: none;">
+                        🔥 Ratxa: <span id="combo-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Number Selector -->
+                <div class="mb-2 sm:mb-6">
+                    <h2 class="text-sm sm:text-xl font-bold text-gray-800 mb-2 sm:mb-4 text-center">📝 Tria Taula</h2>
+                    <div class="grid grid-cols-5 gap-1.5 sm:gap-3" id="number-selector">
+                        <button class="selector-btn bg-blue-100 text-blue-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="1">1</button>
+                        <button class="selector-btn bg-green-100 text-green-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="2">2</button>
+                        <button class="selector-btn bg-yellow-100 text-yellow-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="3">3</button>
+                        <button class="selector-btn bg-purple-100 text-purple-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="4">4</button>
+                        <button class="selector-btn bg-red-100 text-red-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="5">5</button>
+                        <button class="selector-btn bg-indigo-100 text-indigo-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="6">6</button>
+                        <button class="selector-btn bg-pink-100 text-pink-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="7">7</button>
+                        <button class="selector-btn bg-orange-100 text-orange-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="8">8</button>
+                        <button class="selector-btn bg-teal-100 text-teal-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="9">9</button>
+                        <button class="selector-btn bg-gray-100 text-gray-800 p-2 sm:p-3 text-sm sm:text-lg" data-number="10">10</button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-2 sm:mb-6">
+                    <div class="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
+                        <span>Progrés</span>
+                        <span id="progress-text">0/0</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+                        <div id="progress-bar" class="progress-bar h-2 sm:h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Number Grid -->
+                <div id="number-grid" class="grid grid-cols-10 gap-1 sm:gap-2 mb-2 sm:mb-4">
+                    <!-- Grid cells will be generated by JavaScript -->
+                </div>
+
+                <!-- Instructions -->
+                <div class="text-center text-gray-600 text-xs leading-relaxed hidden sm:block">
+                    <p>🎯 Toca tots els múltiples del nombre seleccionat!</p>
+                    <p class="mt-1">✅ +10 punts per encert, 🔥 Bonus per ratxa!</p>
+                </div>
+            </div>
+
+            <!-- Equation Display Below Grid -->
+            <div id="equation-container" class="mt-3 sm:mt-4" style="display: none;">
+                <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-8 sm:py-6 shadow-2xl border-4 border-white transform scale-0" id="equation-display-card">
+                    <div class="text-white text-center">
+                        <div class="text-3xl sm:text-5xl md:text-6xl font-bold" id="equation-text-inline">6 × 4 = 24</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Celebration Overlay for Hunter -->
+        <div id="celebration-overlay" class="celebration-overlay">
+            <div class="flex items-center justify-center h-full p-4">
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto transform scale-0" id="celebration-content">
+                    <div class="text-5xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Felicitats!</h2>
+                    <p class="text-gray-600 mb-2 text-sm sm:text-base">Has dominat la taula del <span id="completed-table" class="font-bold text-purple-600"></span>!</p>
+                    <p class="text-2xl font-bold text-purple-600 mb-4">+<span id="table-bonus">50</span> punts bonus!</p>
+                    <div class="text-4xl mb-4">
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                    </div>
+                    <button id="continue-btn" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:shadow-lg active:scale-95 transition-all duration-300 text-sm sm:text-base">
+                        🎮 Continua Jugant
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- ==================== GAME 2: SPEED CHALLENGE ==================== -->
+    <div id="speed-game" style="display: none;">
+        <!-- Back to Menu Button -->
+        <div class="fixed top-2 left-2 sm:top-4 sm:left-4 z-40">
+            <button onclick="showMenu()" class="bg-white text-orange-600 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-sm">
+                ◀️ Menú
+            </button>
+        </div>
+
+        <div class="container mx-auto px-4 py-4 max-w-md">
+            <!-- Header -->
+            <div class="text-center mb-4 sm:mb-6">
+                <h1 class="text-xl sm:text-4xl font-bold text-white mb-1 drop-shadow-lg">⚡ Repte de Velocitat</h1>
+                <p class="text-white text-xs sm:text-lg opacity-90">Respon abans que s'acabi el temps!</p>
+            </div>
+
+            <!-- Game Stats -->
+            <div class="game-container p-4 mb-4">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl sm:text-3xl font-bold text-purple-600" id="speed-score">0</div>
+                        <div class="text-gray-600 text-xs sm:text-sm">Punts</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl sm:text-3xl font-bold text-orange-600" id="speed-streak">0</div>
+                        <div class="text-gray-600 text-xs sm:text-sm">Ratxa</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl sm:text-3xl font-bold text-green-600" id="speed-level">1</div>
+                        <div class="text-gray-600 text-xs sm:text-sm">Nivell</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="mb-4">
+                <div class="w-full bg-gray-200 rounded-full h-4 sm:h-6 overflow-hidden">
+                    <div id="timer-bar" class="timer-bar bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Question Display -->
+            <div class="game-container p-6 sm:p-8 mb-4 text-center">
+                <div id="speed-question" class="text-4xl sm:text-6xl font-bold text-gray-800 mb-2">
+                    Prem Juga!
+                </div>
+                <div id="streak-badge" class="streak-badge inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full font-bold text-sm sm:text-base" style="display: none;">
+                    🔥 Ratxa de <span id="streak-number">5</span>!
+                </div>
+            </div>
+
+            <!-- Answer Buttons -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4" id="answer-buttons">
+                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="0">?</button>
+                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="1">?</button>
+                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="2">?</button>
+                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="3">?</button>
+            </div>
+
+            <!-- Table Selector for Speed Game -->
+            <div class="game-container p-4">
+                <h3 class="text-sm font-bold text-gray-800 mb-2 text-center">Taules actives:</h3>
+                <div class="grid grid-cols-5 gap-2" id="speed-table-selector">
+                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="2">2</button>
+                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="3">3</button>
+                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="4">4</button>
+                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="5">5</button>
+                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="6">6</button>
+                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="7">7</button>
+                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="8">8</button>
+                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="9">9</button>
+                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="10">10</button>
+                    <button id="speed-start-btn" class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2 rounded-lg text-sm font-bold">▶️ Juga!</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Overlay for Speed -->
+        <div id="speed-gameover" class="celebration-overlay">
+            <div class="flex items-center justify-center h-full p-4">
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto transform scale-0" id="gameover-content">
+                    <div class="text-5xl sm:text-6xl mb-3 sm:mb-4" id="gameover-emoji">😊</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Fi del Joc!</h2>
+                    <div class="text-4xl font-bold text-purple-600 mb-2" id="final-score">0</div>
+                    <p class="text-gray-600 text-sm mb-1">Millor ratxa: <span id="final-streak" class="font-bold text-orange-600">0</span></p>
+                    <p class="text-gray-600 text-sm mb-4">Respostes correctes: <span id="final-correct" class="font-bold text-green-600">0</span></p>
+                    <div class="text-3xl mb-4" id="final-stars">
+                        <span class="star">⭐</span>
+                    </div>
+                    <div id="new-record" class="text-xl font-bold text-yellow-500 mb-4" style="display: none;">
+                        🏆 Nou Rècord! 🏆
+                    </div>
+                    <button id="speed-restart-btn" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:shadow-lg active:scale-95 transition-all duration-300 text-sm sm:text-base">
+                        🎮 Juga Altra Vegada
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Audio Elements -->
     <audio id="correct-sound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
@@ -365,23 +658,78 @@
     <audio id="celebration-sound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
     </audio>
-    
+
     <script>
-        class MultiplicationGame {
+        // ==================== GLOBAL FUNCTIONS ====================
+        let hunterGame = null;
+        let speedGame = null;
+
+        function loadHighScores() {
+            const hunterHS = localStorage.getItem('hunterHighScore') || 0;
+            const speedHS = localStorage.getItem('speedHighScore') || 0;
+            document.getElementById('hunter-highscore').textContent = hunterHS;
+            document.getElementById('speed-highscore').textContent = speedHS;
+        }
+
+        function showMenu() {
+            document.getElementById('main-menu').style.display = 'block';
+            document.getElementById('hunter-game').style.display = 'none';
+            document.getElementById('speed-game').style.display = 'none';
+            if (speedGame) speedGame.stopGame();
+            loadHighScores();
+        }
+
+        function startGame(gameType) {
+            document.getElementById('main-menu').style.display = 'none';
+
+            if (gameType === 'hunter') {
+                document.getElementById('hunter-game').style.display = 'block';
+                document.getElementById('speed-game').style.display = 'none';
+                if (!hunterGame) {
+                    hunterGame = new MultipleHunterGame();
+                } else {
+                    hunterGame.resetGame();
+                }
+            } else if (gameType === 'speed') {
+                document.getElementById('hunter-game').style.display = 'none';
+                document.getElementById('speed-game').style.display = 'block';
+                if (!speedGame) {
+                    speedGame = new SpeedChallengeGame();
+                } else {
+                    speedGame.resetToStart();
+                }
+            }
+        }
+
+        function playSound(type) {
+            try {
+                const audio = document.getElementById(`${type}-sound`);
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            } catch (e) {}
+        }
+
+        // ==================== GAME 1: MULTIPLE HUNTER ====================
+        class MultipleHunterGame {
             constructor() {
                 this.selectedNumber = null;
                 this.correctCells = new Set();
                 this.totalCorrect = 0;
                 this.gridSize = 100;
+                this.score = 0;
+                this.combo = 0;
+                this.level = 1;
+                this.tablesCompleted = new Set();
                 this.init();
             }
-            
+
             init() {
                 this.createGrid();
                 this.bindEvents();
                 this.updateProgress();
+                this.updateScore();
             }
-            
+
             createGrid() {
                 const grid = document.getElementById('number-grid');
                 grid.innerHTML = '';
@@ -392,7 +740,6 @@
                     cell.textContent = i;
                     cell.dataset.number = i;
 
-                    // Use touchstart for better mobile responsiveness
                     let touchHandled = false;
 
                     cell.addEventListener('touchstart', (e) => {
@@ -412,10 +759,9 @@
                     grid.appendChild(cell);
                 }
             }
-            
+
             bindEvents() {
-                // Number selector buttons - enhanced for mobile
-                document.querySelectorAll('.selector-btn').forEach(btn => {
+                document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
                     let touchHandled = false;
 
                     btn.addEventListener('touchstart', (e) => {
@@ -433,7 +779,6 @@
                     });
                 });
 
-                // Reset button - enhanced for mobile
                 const resetBtn = document.getElementById('reset-btn');
                 let resetTouchHandled = false;
 
@@ -450,7 +795,6 @@
                     resetTouchHandled = false;
                 });
 
-                // Continue button in celebration - enhanced for mobile
                 const continueBtn = document.getElementById('continue-btn');
                 let continueTouchHandled = false;
 
@@ -458,63 +802,49 @@
                     e.preventDefault();
                     continueTouchHandled = true;
                     this.hideCelebration();
-                    this.resetGame();
                 });
 
                 continueBtn.addEventListener('click', () => {
                     if (!continueTouchHandled) {
                         this.hideCelebration();
-                        this.resetGame();
                     }
                     continueTouchHandled = false;
                 });
             }
-            
+
             selectNumber(number) {
                 this.selectedNumber = number;
                 this.correctCells.clear();
+                this.combo = 0;
+                this.updateCombo();
 
-                // Count actual multiples in the grid (1 to 100)
                 let count = 0;
                 for (let i = 1; i <= this.gridSize; i++) {
-                    if (i % number === 0) {
-                        count++;
-                    }
+                    if (i % number === 0) count++;
                 }
                 this.totalCorrect = count;
 
-                // Hide equation when selecting new table
                 this.hideEquation();
 
-                // Update button states - only change active state, not colors
-                document.querySelectorAll('.selector-btn').forEach(btn => {
+                document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
                     btn.classList.remove('active');
-                    // Reset to original colors
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
-                });
 
-                // Set the selected button as active
-                const selectedBtn = document.querySelector(`[data-number="${number}"]`);
-                selectedBtn.classList.add('active');
-
-                // Reset grid
-                this.createGrid();
-
-                // Mark already found correct answers from previous attempts
-                this.correctCells.forEach(number => {
-                    const cell = document.querySelector(`.number-cell[data-number="${number}"]`);
-                    if (cell && number % this.selectedNumber === 0) {
-                        cell.classList.add('correct');
-                        cell.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
-                        cell.style.color = 'white';
-                        cell.style.fontWeight = 'bold';
+                    // Mark completed tables
+                    if (this.tablesCompleted.has(num)) {
+                        btn.classList.add('opacity-50');
+                        btn.innerHTML = `${num} ✓`;
                     }
                 });
 
+                const selectedBtn = document.querySelector(`#hunter-game [data-number="${number}"]`);
+                selectedBtn.classList.add('active');
+
+                this.createGrid();
                 this.updateProgress();
             }
-            
+
             getButtonColorClass(number) {
                 const colorClasses = {
                     1: 'bg-blue-100 text-blue-800',
@@ -530,100 +860,167 @@
                 };
                 return colorClasses[number] || 'bg-gray-100 text-gray-800';
             }
-            
+
             handleCellClick(number) {
                 if (!this.selectedNumber) {
-                    this.showMessage('Si us plau, selecciona primer una taula de multiplicar!');
+                    alert('Si us plau, selecciona primer una taula de multiplicar!');
                     return;
                 }
 
-                const cell = document.querySelector(`.number-cell[data-number="${number}"]`);
-                
-                // Check if already answered
+                const cell = document.querySelector(`#hunter-game .number-cell[data-number="${number}"]`);
+
                 if (cell.classList.contains('correct') || cell.classList.contains('incorrect')) {
                     return;
                 }
-                
+
                 if (number % this.selectedNumber === 0) {
-                    // Correct answer
                     cell.classList.add('correct');
                     cell.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
                     cell.style.color = 'white';
                     cell.style.fontWeight = 'bold';
                     this.correctCells.add(number);
 
-                    // Show new equation (it will update or show without hiding)
-                    this.showEquation(number, cell);
+                    // Add points with combo bonus
+                    this.combo++;
+                    const comboBonus = Math.min(this.combo - 1, 5) * 2;
+                    const points = 10 + comboBonus;
+                    this.score += points;
+                    this.updateScore();
+                    this.updateCombo();
 
-                    this.playSound('applause');
+                    this.showEquation(number, cell);
+                    this.showPointsPopup(cell, points);
+
+                    playSound('applause');
                     this.animateCorrect(cell);
                 } else {
-                    // Incorrect answer
                     cell.classList.add('incorrect');
                     cell.style.background = 'linear-gradient(45deg, #FF6B6B, #FF8E8E)';
                     cell.style.color = 'white';
-                    this.playSound('incorrect');
+                    this.combo = 0;
+                    this.updateCombo();
+                    playSound('incorrect');
                 }
-                
+
                 this.updateProgress();
-                
-                // Check if game completed
+
                 if (this.correctCells.size === this.totalCorrect) {
                     setTimeout(() => this.completeGame(), 500);
                 }
             }
-            
+
+            showPointsPopup(cell, points) {
+                const popup = document.createElement('div');
+                popup.className = 'points-popup fixed text-green-500 font-bold text-lg z-50';
+                popup.textContent = `+${points}`;
+
+                const rect = cell.getBoundingClientRect();
+                popup.style.left = rect.left + rect.width / 2 - 15 + 'px';
+                popup.style.top = rect.top - 10 + 'px';
+
+                document.body.appendChild(popup);
+                setTimeout(() => popup.remove(), 600);
+            }
+
+            updateScore() {
+                document.getElementById('hunter-score').textContent = this.score;
+
+                // Update high score
+                const currentHS = parseInt(localStorage.getItem('hunterHighScore') || 0);
+                if (this.score > currentHS) {
+                    localStorage.setItem('hunterHighScore', this.score);
+                }
+            }
+
+            updateCombo() {
+                const comboDisplay = document.getElementById('combo-display');
+                const comboCount = document.getElementById('combo-count');
+
+                if (this.combo >= 3) {
+                    comboDisplay.style.display = 'block';
+                    comboCount.textContent = this.combo;
+                } else {
+                    comboDisplay.style.display = 'none';
+                }
+            }
+
             updateProgress() {
                 const progress = this.totalCorrect > 0 ? (this.correctCells.size / this.totalCorrect) * 100 : 0;
                 document.getElementById('progress-bar').style.width = `${progress}%`;
                 document.getElementById('progress-text').textContent = `${this.correctCells.size}/${this.totalCorrect}`;
             }
-            
+
             completeGame() {
-                // Mark all correct cells as completed with green background
                 this.correctCells.forEach(number => {
-                    const cell = document.querySelector(`.number-cell[data-number="${number}"]`);
+                    const cell = document.querySelector(`#hunter-game .number-cell[data-number="${number}"]`);
                     cell.classList.remove('correct');
                     cell.classList.add('completed');
-                    cell.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
-                    cell.style.color = 'white';
-                    cell.style.fontWeight = 'bold';
                 });
 
+                // Add completion bonus
+                const tableBonus = 50 + (this.selectedNumber * 5);
+                this.score += tableBonus;
+                this.tablesCompleted.add(this.selectedNumber);
+
+                // Level up check
+                if (this.tablesCompleted.size >= this.level * 2) {
+                    this.level++;
+                    document.getElementById('hunter-level').textContent = this.level;
+                }
+
+                this.updateScore();
+                document.getElementById('table-bonus').textContent = tableBonus;
                 this.showCelebration();
             }
-            
+
             showCelebration() {
                 const overlay = document.getElementById('celebration-overlay');
                 const content = document.getElementById('celebration-content');
                 const completedTable = document.getElementById('completed-table');
-                
+
                 completedTable.textContent = this.selectedNumber;
                 overlay.style.display = 'block';
-                
-                // Animate celebration content
+
                 anime({
                     targets: content,
                     scale: [0, 1],
                     duration: 800,
                     easing: 'easeOutElastic(1, .8)'
                 });
-                
-                // Create confetti
+
                 this.createConfetti();
-                
-                // Play celebration sound
-                this.playSound('celebration');
+                playSound('celebration');
             }
-            
+
             hideCelebration() {
                 const overlay = document.getElementById('celebration-overlay');
                 overlay.style.display = 'none';
+
+                // Reset for next table
+                this.selectedNumber = null;
+                this.correctCells.clear();
+                this.combo = 0;
+                this.updateCombo();
+                this.createGrid();
+                this.updateProgress();
+
+                // Update selector buttons to show completed tables
+                document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    const num = parseInt(btn.dataset.number);
+                    btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
+                    if (this.tablesCompleted.has(num)) {
+                        btn.classList.add('opacity-50');
+                        btn.innerHTML = `${num} ✓`;
+                    } else {
+                        btn.innerHTML = num;
+                    }
+                });
             }
-            
+
             createConfetti() {
                 const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
-                
+
                 for (let i = 0; i < 50; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
@@ -631,13 +1028,13 @@
                     confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                     confetti.style.animationDelay = Math.random() * 3 + 's';
                     confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    
+
                     document.getElementById('celebration-overlay').appendChild(confetti);
-                    
+
                     setTimeout(() => confetti.remove(), 5000);
                 }
             }
-            
+
             showEquation(number, clickedCell) {
                 const multiplier = number / this.selectedNumber;
                 const equationText = `${multiplier} × ${this.selectedNumber} = ${number}`;
@@ -648,24 +1045,19 @@
 
                 const isAlreadyVisible = container.style.display === 'block';
 
-                // Update equation text
                 text.textContent = equationText;
 
                 if (!isAlreadyVisible) {
-                    // First time showing - animate in
                     container.style.display = 'block';
                     setTimeout(() => {
                         card.style.transform = 'scale(1)';
                     }, 10);
                 } else {
-                    // Already visible - just update text with a subtle pulse
                     card.style.transform = 'scale(1.1)';
                     setTimeout(() => {
                         card.style.transform = 'scale(1)';
                     }, 200);
                 }
-
-                // Equation stays visible permanently
             }
 
             hideEquation() {
@@ -673,9 +1065,7 @@
                 const card = document.getElementById('equation-display-card');
 
                 if (container.style.display === 'block') {
-                    // Animate out
                     card.style.transform = 'scale(0)';
-
                     setTimeout(() => {
                         container.style.display = 'none';
                     }, 300);
@@ -690,48 +1080,352 @@
                     easing: 'easeOutElastic(1, .8)'
                 });
             }
-            
-            playSound(type) {
-                try {
-                    const audio = document.getElementById(`${type}-sound`);
-                    audio.currentTime = 0;
-                    audio.play().catch(() => {
-                        // Ignore audio play errors (user interaction required)
-                    });
-                } catch (e) {
-                    // Ignore audio errors
-                }
-            }
-            
-            showMessage(message) {
-                // Simple message display - could be enhanced with a toast notification
-                alert(message);
-            }
-            
+
             resetGame() {
                 this.selectedNumber = null;
                 this.correctCells.clear();
                 this.totalCorrect = 0;
+                this.score = 0;
+                this.combo = 0;
+                this.level = 1;
+                this.tablesCompleted.clear();
 
-                // Hide equation when resetting
                 this.hideEquation();
+                this.updateScore();
+                this.updateCombo();
+                document.getElementById('hunter-level').textContent = 1;
 
-                // Reset buttons - restore original colors
-                document.querySelectorAll('.selector-btn').forEach(btn => {
-                    btn.classList.remove('active');
+                document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
+                    btn.classList.remove('active', 'opacity-50');
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
+                    btn.innerHTML = num;
                 });
 
-                // Reset grid
                 this.createGrid();
                 this.updateProgress();
             }
         }
-        
-        // Initialize game when page loads
+
+        // ==================== GAME 2: SPEED CHALLENGE ====================
+        class SpeedChallengeGame {
+            constructor() {
+                this.score = 0;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.level = 1;
+                this.correctAnswers = 0;
+                this.activeTables = [2, 3, 4, 5];
+                this.currentQuestion = null;
+                this.correctAnswer = null;
+                this.timeLeft = 100;
+                this.maxTime = 100;
+                this.timerInterval = null;
+                this.isPlaying = false;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateDisplay();
+            }
+
+            bindEvents() {
+                // Table selector buttons
+                document.querySelectorAll('.speed-table-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const table = parseInt(btn.dataset.table);
+                        if (table) this.toggleTable(table, btn);
+                    });
+                });
+
+                // Start button
+                document.getElementById('speed-start-btn').addEventListener('click', () => {
+                    if (this.activeTables.length > 0) {
+                        this.startGame();
+                    } else {
+                        alert('Selecciona almenys una taula!');
+                    }
+                });
+
+                // Answer buttons
+                document.querySelectorAll('.answer-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (this.isPlaying) {
+                            this.checkAnswer(parseInt(btn.textContent));
+                        }
+                    });
+                });
+
+                // Restart button
+                document.getElementById('speed-restart-btn').addEventListener('click', () => {
+                    this.hideGameOver();
+                    this.resetToStart();
+                });
+            }
+
+            toggleTable(table, btn) {
+                if (this.isPlaying) return;
+
+                const index = this.activeTables.indexOf(table);
+                if (index > -1) {
+                    this.activeTables.splice(index, 1);
+                    btn.classList.remove('active');
+                    btn.classList.remove('bg-green-500', 'text-white');
+                    btn.classList.add('bg-gray-300', 'text-gray-600');
+                } else {
+                    this.activeTables.push(table);
+                    btn.classList.add('active');
+                    btn.classList.remove('bg-gray-300', 'text-gray-600');
+                    btn.classList.add('bg-green-500', 'text-white');
+                }
+            }
+
+            startGame() {
+                this.isPlaying = true;
+                this.score = 0;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.correctAnswers = 0;
+                this.level = 1;
+                this.timeLeft = this.maxTime;
+
+                // Disable table selection
+                document.querySelectorAll('.speed-table-btn').forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.5';
+                });
+                document.getElementById('speed-start-btn').style.display = 'none';
+
+                this.updateDisplay();
+                this.generateQuestion();
+                this.startTimer();
+            }
+
+            stopGame() {
+                this.isPlaying = false;
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            startTimer() {
+                this.timerInterval = setInterval(() => {
+                    this.timeLeft -= 1;
+                    this.updateTimerBar();
+
+                    if (this.timeLeft <= 20) {
+                        document.getElementById('timer-bar').classList.add('warning');
+                    }
+
+                    if (this.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 100);
+            }
+
+            updateTimerBar() {
+                const percentage = (this.timeLeft / this.maxTime) * 100;
+                document.getElementById('timer-bar').style.width = `${percentage}%`;
+            }
+
+            generateQuestion() {
+                const table = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
+                const multiplier = Math.floor(Math.random() * 10) + 1;
+                this.correctAnswer = table * multiplier;
+                this.currentQuestion = { table, multiplier };
+
+                document.getElementById('speed-question').textContent = `${table} × ${multiplier} = ?`;
+
+                // Generate answer options
+                const answers = [this.correctAnswer];
+                while (answers.length < 4) {
+                    let wrongAnswer;
+                    const wrongType = Math.floor(Math.random() * 4);
+
+                    if (wrongType === 0) {
+                        wrongAnswer = table * (multiplier + (Math.random() > 0.5 ? 1 : -1));
+                    } else if (wrongType === 1) {
+                        const wrongTable = this.activeTables[Math.floor(Math.random() * this.activeTables.length)];
+                        wrongAnswer = wrongTable * multiplier;
+                    } else if (wrongType === 2) {
+                        wrongAnswer = this.correctAnswer + Math.floor(Math.random() * 10) - 5;
+                    } else {
+                        wrongAnswer = Math.floor(Math.random() * 100) + 1;
+                    }
+
+                    if (wrongAnswer > 0 && wrongAnswer !== this.correctAnswer && !answers.includes(wrongAnswer)) {
+                        answers.push(wrongAnswer);
+                    }
+                }
+
+                // Shuffle answers
+                answers.sort(() => Math.random() - 0.5);
+
+                // Update buttons
+                const buttons = document.querySelectorAll('.answer-btn');
+                buttons.forEach((btn, index) => {
+                    btn.textContent = answers[index];
+                    btn.classList.remove('correct-answer', 'wrong-answer');
+                });
+            }
+
+            checkAnswer(answer) {
+                const buttons = document.querySelectorAll('.answer-btn');
+
+                if (answer === this.correctAnswer) {
+                    this.streak++;
+                    this.correctAnswers++;
+                    if (this.streak > this.bestStreak) this.bestStreak = this.streak;
+
+                    const streakBonus = Math.min(this.streak - 1, 10) * 5;
+                    const levelBonus = (this.level - 1) * 10;
+                    const points = 10 + streakBonus + levelBonus;
+                    this.score += points;
+
+                    this.timeLeft = Math.min(this.timeLeft + 15, this.maxTime);
+                    document.getElementById('timer-bar').classList.remove('warning');
+
+                    if (this.correctAnswers % 10 === 0) {
+                        this.level++;
+                        this.maxTime = Math.max(60, this.maxTime - 5);
+                    }
+
+                    buttons.forEach(btn => {
+                        if (parseInt(btn.textContent) === this.correctAnswer) {
+                            btn.classList.add('correct-answer');
+                        }
+                    });
+
+                    playSound('correct');
+                    this.showStreakBadge();
+                } else {
+                    this.streak = 0;
+                    this.timeLeft = Math.max(0, this.timeLeft - 20);
+
+                    buttons.forEach(btn => {
+                        if (parseInt(btn.textContent) === answer) {
+                            btn.classList.add('wrong-answer');
+                        }
+                        if (parseInt(btn.textContent) === this.correctAnswer) {
+                            btn.classList.add('correct-answer');
+                        }
+                    });
+
+                    playSound('incorrect');
+                    this.hideStreakBadge();
+                }
+
+                this.updateDisplay();
+
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        this.generateQuestion();
+                    }
+                }, 500);
+            }
+
+            showStreakBadge() {
+                if (this.streak >= 3) {
+                    const badge = document.getElementById('streak-badge');
+                    document.getElementById('streak-number').textContent = this.streak;
+                    badge.style.display = 'inline-block';
+                }
+            }
+
+            hideStreakBadge() {
+                document.getElementById('streak-badge').style.display = 'none';
+            }
+
+            updateDisplay() {
+                document.getElementById('speed-score').textContent = this.score;
+                document.getElementById('speed-streak').textContent = this.streak;
+                document.getElementById('speed-level').textContent = this.level;
+            }
+
+            endGame() {
+                this.stopGame();
+
+                const currentHS = parseInt(localStorage.getItem('speedHighScore') || 0);
+                const isNewRecord = this.score > currentHS;
+                if (isNewRecord) {
+                    localStorage.setItem('speedHighScore', this.score);
+                }
+
+                document.getElementById('final-score').textContent = this.score;
+                document.getElementById('final-streak').textContent = this.bestStreak;
+                document.getElementById('final-correct').textContent = this.correctAnswers;
+
+                let emoji = '😊';
+                let stars = 1;
+                if (this.correctAnswers >= 30) {
+                    emoji = '🏆';
+                    stars = 3;
+                } else if (this.correctAnswers >= 15) {
+                    emoji = '🌟';
+                    stars = 2;
+                } else if (this.correctAnswers >= 5) {
+                    emoji = '👍';
+                    stars = 1;
+                }
+
+                document.getElementById('gameover-emoji').textContent = emoji;
+                document.getElementById('final-stars').innerHTML = '<span class="star">⭐</span>'.repeat(stars);
+                document.getElementById('new-record').style.display = isNewRecord ? 'block' : 'none';
+
+                const overlay = document.getElementById('speed-gameover');
+                const content = document.getElementById('gameover-content');
+                overlay.style.display = 'block';
+
+                anime({
+                    targets: content,
+                    scale: [0, 1],
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .8)'
+                });
+
+                playSound('celebration');
+            }
+
+            hideGameOver() {
+                document.getElementById('speed-gameover').style.display = 'none';
+            }
+
+            resetToStart() {
+                this.stopGame();
+                this.score = 0;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.correctAnswers = 0;
+                this.level = 1;
+                this.timeLeft = 100;
+                this.maxTime = 100;
+
+                document.querySelectorAll('.speed-table-btn').forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                });
+                document.getElementById('speed-start-btn').style.display = 'block';
+
+                document.getElementById('timer-bar').style.width = '100%';
+                document.getElementById('timer-bar').classList.remove('warning');
+
+                document.getElementById('speed-question').textContent = 'Prem Juga!';
+
+                document.querySelectorAll('.answer-btn').forEach((btn) => {
+                    btn.textContent = '?';
+                    btn.classList.remove('correct-answer', 'wrong-answer');
+                });
+
+                this.hideStreakBadge();
+                this.updateDisplay();
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
-            new MultiplicationGame();
+            loadHighScores();
         });
     </script>
 </body>
