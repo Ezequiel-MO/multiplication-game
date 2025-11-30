@@ -530,15 +530,51 @@
         <div id="celebration-overlay" class="celebration-overlay">
             <div class="flex items-center justify-center h-full p-4">
                 <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto transform scale-0" id="celebration-content">
-                    <div class="text-5xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Felicitats!</h2>
-                    <p class="text-gray-600 mb-2 text-sm sm:text-base">Has dominat la taula del <span id="completed-table" class="font-bold text-purple-600"></span>!</p>
-                    <p class="text-2xl font-bold text-purple-600 mb-4">+<span id="table-bonus">50</span> punts bonus!</p>
-                    <div class="text-4xl mb-4">
+                    <div class="text-5xl sm:text-6xl mb-2" id="celebration-emoji">🎉</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1" id="celebration-title">Felicitats!</h2>
+                    <p class="text-gray-600 mb-3 text-sm sm:text-base">Taula del <span id="completed-table" class="font-bold text-purple-600"></span> completada!</p>
+
+                    <!-- Star Rating -->
+                    <div class="text-4xl mb-3" id="celebration-stars">
                         <span class="star">⭐</span>
                         <span class="star">⭐</span>
                         <span class="star">⭐</span>
                     </div>
+
+                    <!-- Performance Badges -->
+                    <div class="flex flex-wrap justify-center gap-2 mb-3" id="performance-badges">
+                        <!-- Badges will be inserted here -->
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                        <div class="bg-gray-100 rounded-lg p-2">
+                            <div class="text-lg font-bold text-blue-600" id="stat-time">0s</div>
+                            <div class="text-xs text-gray-500">Temps</div>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-2">
+                            <div class="text-lg font-bold text-green-600" id="stat-combo">0</div>
+                            <div class="text-xs text-gray-500">Millor Ratxa</div>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-2">
+                            <div class="text-lg font-bold text-red-600" id="stat-mistakes">0</div>
+                            <div class="text-xs text-gray-500">Errors</div>
+                        </div>
+                    </div>
+
+                    <!-- Bonus Breakdown -->
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-3 mb-3">
+                        <div class="text-sm text-gray-600 mb-1" id="bonus-breakdown">
+                            <!-- Breakdown will be inserted here -->
+                        </div>
+                        <div class="text-2xl font-bold text-purple-600">+<span id="table-bonus">0</span> punts!</div>
+                    </div>
+
+                    <!-- New Record Badge (hidden by default) -->
+                    <div id="new-record-hunter" class="text-lg font-bold text-yellow-500 mb-3" style="display: none;">
+                        🏆 Nou Rècord de Temps! 🏆
+                    </div>
+
                     <button id="continue-btn" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:shadow-lg active:scale-95 transition-all duration-300 text-sm sm:text-base">
                         🎮 Continua Jugant
                     </button>
@@ -723,8 +759,23 @@
                 this.gridSize = 100;
                 this.score = 0;
                 this.combo = 0;
+                this.maxCombo = 0;           // Track best combo for this table
                 this.level = 1;
                 this.tablesCompleted = new Set();
+
+                // Enhanced gamification tracking
+                this.mistakes = 0;           // Mistakes for current table
+                this.tableStartTime = 0;     // When player started current table
+                this.tableMastery = {};      // { table: { stars: 0, bestTime: null, perfectRuns: 0 } }
+
+                // Combo tier thresholds for visual feedback
+                this.comboTiers = {
+                    3: { name: 'Bona Ratxa!', color: 'text-yellow-500', multiplier: 1.2 },
+                    5: { name: 'Increïble!', color: 'text-orange-500', multiplier: 1.5 },
+                    7: { name: 'En Flames! 🔥', color: 'text-red-500', multiplier: 2.0 },
+                    10: { name: 'LLEGENDARI! ⚡', color: 'text-purple-500', multiplier: 3.0 }
+                };
+
                 this.init();
             }
 
@@ -821,6 +872,9 @@
                 this.selectedNumber = number;
                 this.correctCells.clear();
                 this.combo = 0;
+                this.maxCombo = 0;
+                this.mistakes = 0;
+                this.tableStartTime = Date.now();
                 this.updateCombo();
 
                 let count = 0;
@@ -829,6 +883,12 @@
                 }
                 this.totalCorrect = count;
 
+                // Initialize mastery tracking for this table if needed
+                if (!this.tableMastery[number]) {
+                    this.tableMastery[number] = { stars: 0, bestTime: null, perfectRuns: 0, attempts: 0 };
+                }
+                this.tableMastery[number].attempts++;
+
                 this.hideEquation();
 
                 document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
@@ -836,10 +896,11 @@
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
 
-                    // Mark completed tables
+                    // Mark completed tables with star rating
                     if (this.tablesCompleted.has(num)) {
-                        btn.classList.add('opacity-50');
-                        btn.innerHTML = `${num} ✓`;
+                        const mastery = this.tableMastery[num];
+                        const stars = mastery ? '⭐'.repeat(mastery.stars) : '✓';
+                        btn.innerHTML = `${num} <span class="text-xs">${stars}</span>`;
                     }
                 });
 
@@ -885,16 +946,23 @@
                     cell.style.fontWeight = 'bold';
                     this.correctCells.add(number);
 
-                    // Add points with combo bonus
+                    // Enhanced combo system with tiered multipliers
                     this.combo++;
-                    const comboBonus = Math.min(this.combo - 1, 5) * 2;
-                    const points = 10 + comboBonus;
+                    if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+
+                    // Calculate points with combo multiplier
+                    const basePoints = 10;
+                    const comboMultiplier = this.getComboMultiplier();
+                    const points = Math.round(basePoints * comboMultiplier);
                     this.score += points;
                     this.updateScore();
                     this.updateCombo();
 
+                    // Show combo tier notification when reaching new tier
+                    this.checkComboTierUp();
+
                     this.showEquation(number, cell);
-                    this.showPointsPopup(cell, points);
+                    this.showPointsPopup(cell, points, comboMultiplier > 1);
 
                     playSound('applause');
                     this.animateCorrect(cell);
@@ -902,9 +970,15 @@
                     cell.classList.add('incorrect');
                     cell.style.background = 'linear-gradient(45deg, #FF6B6B, #FF8E8E)';
                     cell.style.color = 'white';
+                    this.mistakes++;
                     this.combo = 0;
                     this.updateCombo();
                     playSound('incorrect');
+
+                    // Show encouraging message on first few mistakes
+                    if (this.mistakes <= 2) {
+                        this.showEncouragement();
+                    }
                 }
 
                 this.updateProgress();
@@ -914,10 +988,76 @@
                 }
             }
 
-            showPointsPopup(cell, points) {
+            // Get combo multiplier based on current combo tier
+            getComboMultiplier() {
+                let multiplier = 1;
+                for (const [threshold, tier] of Object.entries(this.comboTiers)) {
+                    if (this.combo >= parseInt(threshold)) {
+                        multiplier = tier.multiplier;
+                    }
+                }
+                return multiplier;
+            }
+
+            // Check if player reached a new combo tier and show notification
+            checkComboTierUp() {
+                const tiers = Object.keys(this.comboTiers).map(Number).sort((a, b) => a - b);
+                for (const threshold of tiers) {
+                    if (this.combo === threshold) {
+                        this.showComboTierNotification(this.comboTiers[threshold]);
+                        break;
+                    }
+                }
+            }
+
+            // Show combo tier notification popup
+            showComboTierNotification(tier) {
                 const popup = document.createElement('div');
-                popup.className = 'points-popup fixed text-green-500 font-bold text-lg z-50';
-                popup.textContent = `+${points}`;
+                popup.className = `fixed top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 ${tier.color}`;
+                popup.innerHTML = `
+                    <div class="bg-white px-6 py-3 rounded-2xl shadow-2xl text-center font-bold text-xl" style="animation: bounce-in 0.4s ease forwards;">
+                        ${tier.name}
+                        <div class="text-sm text-gray-500">x${tier.multiplier} punts!</div>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+
+                setTimeout(() => {
+                    popup.style.opacity = '0';
+                    popup.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => popup.remove(), 300);
+                }, 1000);
+            }
+
+            // Show encouragement after mistakes (anti-frustration)
+            showEncouragement() {
+                const messages = [
+                    'Continua intentant-ho! 💪',
+                    'Quasi! Prova un altre! 🎯',
+                    'No passa res! Segueix! 🌟'
+                ];
+                const message = messages[Math.floor(Math.random() * messages.length)];
+
+                const popup = document.createElement('div');
+                popup.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50';
+                popup.innerHTML = `
+                    <div class="bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium" style="animation: bounce-in 0.3s ease forwards;">
+                        ${message}
+                    </div>
+                `;
+                document.body.appendChild(popup);
+
+                setTimeout(() => {
+                    popup.style.opacity = '0';
+                    popup.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => popup.remove(), 300);
+                }, 1500);
+            }
+
+            showPointsPopup(cell, points, hasMultiplier = false) {
+                const popup = document.createElement('div');
+                popup.className = `points-popup fixed font-bold z-50 ${hasMultiplier ? 'text-yellow-500 text-xl' : 'text-green-500 text-lg'}`;
+                popup.textContent = `+${points}${hasMultiplier ? '!' : ''}`;
 
                 const rect = cell.getBoundingClientRect();
                 popup.style.left = rect.left + rect.width / 2 - 15 + 'px';
@@ -962,28 +1102,154 @@
                     cell.classList.add('completed');
                 });
 
-                // Add completion bonus
-                const tableBonus = 50 + (this.selectedNumber * 5);
-                this.score += tableBonus;
+                // Calculate completion time
+                const completionTime = Math.round((Date.now() - this.tableStartTime) / 1000);
+
+                // Calculate star rating based on performance
+                const stars = this.calculateStars(completionTime);
+
+                // Calculate bonuses
+                const baseBonus = 50;
+                const tableBonus = this.selectedNumber * 5;
+                const perfectBonus = this.mistakes === 0 ? 100 : 0;
+                const speedBonus = this.calculateSpeedBonus(completionTime);
+                const comboBonus = Math.min(this.maxCombo, 10) * 5;
+
+                const totalBonus = baseBonus + tableBonus + perfectBonus + speedBonus + comboBonus;
+                this.score += totalBonus;
                 this.tablesCompleted.add(this.selectedNumber);
 
-                // Level up check
-                if (this.tablesCompleted.size >= this.level * 2) {
-                    this.level++;
+                // Update mastery tracking
+                const mastery = this.tableMastery[this.selectedNumber];
+                if (stars > mastery.stars) mastery.stars = stars;
+                if (!mastery.bestTime || completionTime < mastery.bestTime) mastery.bestTime = completionTime;
+                if (this.mistakes === 0) mastery.perfectRuns++;
+
+                // Level up check - now based on total stars earned
+                const totalStars = Object.values(this.tableMastery).reduce((sum, m) => sum + m.stars, 0);
+                const newLevel = Math.floor(totalStars / 5) + 1;
+                if (newLevel > this.level) {
+                    this.level = newLevel;
                     document.getElementById('hunter-level').textContent = this.level;
                 }
 
                 this.updateScore();
-                document.getElementById('table-bonus').textContent = tableBonus;
+
+                // Store completion stats for celebration screen
+                this.lastCompletion = {
+                    table: this.selectedNumber,
+                    time: completionTime,
+                    stars: stars,
+                    mistakes: this.mistakes,
+                    maxCombo: this.maxCombo,
+                    baseBonus,
+                    tableBonus,
+                    perfectBonus,
+                    speedBonus,
+                    comboBonus,
+                    totalBonus,
+                    isPerfect: this.mistakes === 0,
+                    isNewBestTime: mastery.bestTime === completionTime
+                };
+
                 this.showCelebration();
+            }
+
+            // Calculate stars based on performance (0-3)
+            calculateStars(completionTime) {
+                // Base on mistakes and time
+                // 3 stars: Perfect (0 mistakes) and fast
+                // 2 stars: Few mistakes (1-2) or good time
+                // 1 star: Completed
+
+                if (this.mistakes === 0 && completionTime < 60) return 3;
+                if (this.mistakes === 0) return 3;
+                if (this.mistakes <= 2 && completionTime < 90) return 2;
+                if (this.mistakes <= 3) return 2;
+                return 1;
+            }
+
+            // Calculate speed bonus based on completion time
+            calculateSpeedBonus(completionTime) {
+                // Bonus for completing quickly
+                if (completionTime < 30) return 50;  // Very fast
+                if (completionTime < 45) return 30;  // Fast
+                if (completionTime < 60) return 15;  // Good
+                return 0;
             }
 
             showCelebration() {
                 const overlay = document.getElementById('celebration-overlay');
                 const content = document.getElementById('celebration-content');
-                const completedTable = document.getElementById('completed-table');
+                const stats = this.lastCompletion;
 
-                completedTable.textContent = this.selectedNumber;
+                // Update basic info
+                document.getElementById('completed-table').textContent = stats.table;
+                document.getElementById('table-bonus').textContent = stats.totalBonus;
+
+                // Update emoji and title based on performance
+                const emoji = document.getElementById('celebration-emoji');
+                const title = document.getElementById('celebration-title');
+                if (stats.isPerfect && stats.stars === 3) {
+                    emoji.textContent = '🏆';
+                    title.textContent = 'Perfecte!';
+                } else if (stats.stars === 3) {
+                    emoji.textContent = '🌟';
+                    title.textContent = 'Excel·lent!';
+                } else if (stats.stars === 2) {
+                    emoji.textContent = '👏';
+                    title.textContent = 'Molt Bé!';
+                } else {
+                    emoji.textContent = '🎉';
+                    title.textContent = 'Felicitats!';
+                }
+
+                // Update stars display
+                const starsContainer = document.getElementById('celebration-stars');
+                let starsHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    if (i < stats.stars) {
+                        starsHTML += '<span class="star">⭐</span>';
+                    } else {
+                        starsHTML += '<span class="star opacity-30">⭐</span>';
+                    }
+                }
+                starsContainer.innerHTML = starsHTML;
+
+                // Update stats
+                document.getElementById('stat-time').textContent = `${stats.time}s`;
+                document.getElementById('stat-combo').textContent = stats.maxCombo;
+                document.getElementById('stat-mistakes').textContent = stats.mistakes;
+
+                // Update performance badges
+                const badgesContainer = document.getElementById('performance-badges');
+                let badgesHTML = '';
+                if (stats.isPerfect) {
+                    badgesHTML += '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold">✨ Perfecte!</span>';
+                }
+                if (stats.speedBonus > 0) {
+                    badgesHTML += '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">⚡ Ràpid!</span>';
+                }
+                if (stats.maxCombo >= 7) {
+                    badgesHTML += '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold">🔥 Gran Ratxa!</span>';
+                }
+                if (stats.isNewBestTime) {
+                    badgesHTML += '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">🏅 Nou Rècord!</span>';
+                }
+                badgesContainer.innerHTML = badgesHTML;
+
+                // Update bonus breakdown
+                const breakdownContainer = document.getElementById('bonus-breakdown');
+                let breakdownHTML = `<span class="inline-block">Base: ${stats.baseBonus}</span>`;
+                if (stats.tableBonus > 0) breakdownHTML += ` <span class="inline-block">+ Taula: ${stats.tableBonus}</span>`;
+                if (stats.perfectBonus > 0) breakdownHTML += ` <span class="inline-block text-yellow-600">+ Perfecte: ${stats.perfectBonus}</span>`;
+                if (stats.speedBonus > 0) breakdownHTML += ` <span class="inline-block text-blue-600">+ Velocitat: ${stats.speedBonus}</span>`;
+                if (stats.comboBonus > 0) breakdownHTML += ` <span class="inline-block text-orange-600">+ Ratxa: ${stats.comboBonus}</span>`;
+                breakdownContainer.innerHTML = breakdownHTML;
+
+                // Show/hide new record badge
+                document.getElementById('new-record-hunter').style.display = stats.isNewBestTime ? 'block' : 'none';
+
                 overlay.style.display = 'block';
 
                 anime({
@@ -1005,18 +1271,21 @@
                 this.selectedNumber = null;
                 this.correctCells.clear();
                 this.combo = 0;
+                this.maxCombo = 0;
+                this.mistakes = 0;
                 this.updateCombo();
                 this.createGrid();
                 this.updateProgress();
 
-                // Update selector buttons to show completed tables
+                // Update selector buttons to show completed tables with stars
                 document.querySelectorAll('#hunter-game .selector-btn').forEach(btn => {
                     btn.classList.remove('active');
                     const num = parseInt(btn.dataset.number);
                     btn.className = `selector-btn p-3 text-lg ${this.getButtonColorClass(num)}`;
                     if (this.tablesCompleted.has(num)) {
-                        btn.classList.add('opacity-50');
-                        btn.innerHTML = `${num} ✓`;
+                        const mastery = this.tableMastery[num];
+                        const stars = mastery ? '⭐'.repeat(mastery.stars) : '✓';
+                        btn.innerHTML = `${num} <span class="text-xs">${stars}</span>`;
                     } else {
                         btn.innerHTML = num;
                     }
@@ -1092,8 +1361,12 @@
                 this.totalCorrect = 0;
                 this.score = 0;
                 this.combo = 0;
+                this.maxCombo = 0;
                 this.level = 1;
+                this.mistakes = 0;
+                this.tableStartTime = 0;
                 this.tablesCompleted.clear();
+                this.tableMastery = {};
 
                 this.hideEquation();
                 this.updateScore();
