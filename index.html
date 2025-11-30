@@ -561,6 +561,442 @@
                 border: 2px solid #333;
             }
         }
+
+        /* ==================== GAME 3: VISUAL BUILDER STYLES ==================== */
+        .visual-grid {
+            display: grid;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 4px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            /* Prevent iOS Safari zoom on double tap */
+            touch-action: manipulation;
+            /* GPU acceleration for smooth scrolling during drag */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            /* Contain layout to prevent expensive reflows */
+            contain: layout style;
+            /* Ensure the grid stays within bounds on all devices */
+            max-width: 100%;
+            width: min(90vw, 400px);
+            margin: 0 auto;
+        }
+
+        .visual-cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            /* Use GPU-accelerated properties only */
+            transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+            cursor: pointer;
+            /* Minimum touch target 44px for accessibility on mobile */
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: transparent;
+            /* GPU acceleration - use transform3d for hardware acceleration */
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            /* Prevent text selection during drag */
+            -webkit-user-select: none;
+            user-select: none;
+            /* Touch feedback */
+            -webkit-tap-highlight-color: transparent;
+            /* Contain paint to reduce repaints */
+            contain: paint;
+        }
+
+        /* Base state gradient as pseudo-element for smoother transitions */
+        .visual-cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        .visual-cell.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: scale(0.92) translateZ(0);
+            color: white;
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .visual-cell.preview {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5));
+            /* Subtle scale to indicate preview state */
+            transform: scale(0.96) translateZ(0);
+        }
+
+        .visual-cell.correct-area {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            animation: areaPulse 0.5s ease;
+            color: white;
+        }
+
+        .visual-cell.incorrect-area {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+            animation: shake 0.5s ease;
+        }
+
+        .visual-cell.hint-cell {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.6), rgba(255, 152, 0, 0.6));
+            animation: hintPulse 1s ease-in-out infinite;
+        }
+
+        /* Optimized keyframes using transform for GPU acceleration */
+        @keyframes areaPulse {
+            0% { transform: scale(1) translateZ(0); }
+            50% { transform: scale(1.05) translateZ(0); }
+            100% { transform: scale(1) translateZ(0); }
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.6; transform: translateZ(0); }
+            50% { opacity: 1; transform: translateZ(0); }
+        }
+
+        .dimension-label {
+            position: absolute;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            pointer-events: none;
+            white-space: nowrap;
+            /* GPU acceleration handled in specific label rules */
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .dimension-label.width-label {
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(0);
+            -webkit-transform: translateX(-50%) translateZ(0);
+        }
+
+        .dimension-label.height-label {
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg) translateZ(0);
+            -webkit-transform: translateY(-50%) rotate(-90deg) translateZ(0);
+        }
+
+        .equation-builder {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .equation-builder .factor {
+            display: inline-block;
+            min-width: 40px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 8px;
+            margin: 0 4px;
+        }
+
+        .equation-builder .equals {
+            color: #667eea;
+            margin: 0 8px;
+        }
+
+        .equation-builder .result {
+            display: inline-block;
+            min-width: 50px;
+            padding: 4px 16px;
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            border-radius: 8px;
+            margin-left: 4px;
+        }
+
+        .visual-target {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 3px dashed #ff9800;
+            border-radius: 12px;
+            padding: 12px 20px;
+            text-align: center;
+        }
+
+        .visual-target .target-equation {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        .visual-target .target-hint {
+            font-size: 0.875rem;
+            color: #bf360c;
+            margin-top: 4px;
+        }
+
+        .mode-btn {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .mode-btn.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .visual-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .visual-controls button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        /* Mobile adjustments for visual game */
+        @media (max-width: 640px) {
+            .visual-grid {
+                width: min(95vw, 360px);
+                gap: 1.5px;
+            }
+
+            .visual-cell {
+                /* On 10x10 grid with 360px width: ~34px per cell - adequate for touch */
+                min-width: 22px;
+                min-height: 22px;
+                font-size: 0.55rem;
+                border-radius: 3px;
+            }
+
+            .equation-builder {
+                font-size: 1.25rem;
+                padding: 12px;
+            }
+
+            .equation-builder .factor,
+            .equation-builder .result {
+                min-width: 36px;
+                padding: 6px 10px;
+                font-size: 1rem;
+                /* Ensure 44px touch target */
+                min-height: 36px;
+            }
+
+            .visual-target .target-equation {
+                font-size: 1.5rem;
+            }
+
+            .dimension-label {
+                font-size: 0.75rem;
+                padding: 2px 8px;
+            }
+
+            .dimension-label.height-label {
+                left: -32px;
+            }
+
+            /* Larger control buttons for touch */
+            .visual-controls button {
+                min-height: 48px;
+                min-width: 80px;
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Small phones (iPhone SE, older Android) */
+        @media (max-width: 375px) {
+            .visual-grid {
+                width: min(98vw, 300px);
+                gap: 1px;
+                padding: 2px;
+            }
+
+            .visual-cell {
+                /* On 10x10 grid with 300px width: ~28px per cell */
+                min-width: 18px;
+                min-height: 18px;
+                border-radius: 2px;
+            }
+
+            .equation-builder {
+                font-size: 1rem;
+                padding: 10px;
+            }
+
+            .equation-builder .factor,
+            .equation-builder .result {
+                min-width: 30px;
+                padding: 4px 8px;
+                font-size: 0.9rem;
+            }
+
+            .visual-controls button {
+                min-height: 44px;
+                min-width: 70px;
+                padding: 8px 10px;
+                font-size: 0.75rem;
+            }
+
+            .visual-controls {
+                gap: 6px;
+            }
+        }
+
+        /* Landscape mode on mobile - give more horizontal space to grid */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .visual-grid {
+                width: min(50vh, 300px);
+            }
+
+            .visual-controls {
+                flex-direction: row;
+                flex-wrap: nowrap;
+            }
+
+            .visual-controls button {
+                min-width: 60px;
+                padding: 8px 10px;
+            }
+        }
+
+        /* High DPI screens - ensure crisp rendering */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .visual-cell {
+                /* Prevent subpixel rendering issues */
+                transform: translateZ(0);
+            }
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .visual-grid {
+                /* Fix for iOS Safari momentum scrolling interference */
+                -webkit-overflow-scrolling: auto;
+                /* Prevent rubber-band effect on grid */
+                overscroll-behavior: none;
+            }
+
+            .visual-cell {
+                /* iOS Safari tap highlight fix */
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                /* Fix for 300ms tap delay on older iOS */
+                touch-action: manipulation;
+            }
+
+            /* Fix for iOS Safari button styling */
+            .visual-controls button {
+                -webkit-appearance: none;
+                appearance: none;
+            }
+        }
+
+        /* Android Chrome specific optimizations */
+        @supports (overflow: overlay) {
+            .visual-grid {
+                /* Android Chrome scrollbar handling */
+                overflow: overlay;
+            }
+        }
+
+        /* Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            .visual-cell {
+                transition: none;
+                animation: none;
+            }
+
+            .visual-cell.correct-area,
+            .visual-cell.incorrect-area,
+            .visual-cell.hint-cell {
+                animation: none;
+            }
+
+            .mode-btn,
+            .visual-controls button {
+                transition: none;
+            }
+        }
+
+        /* Touch coarse (finger) vs fine (stylus/mouse) */
+        @media (pointer: coarse) {
+            .visual-cell {
+                /* Slightly larger touch targets for fingers */
+                min-width: 26px;
+                min-height: 26px;
+            }
+
+            .visual-controls button {
+                /* Ensure comfortable touch targets */
+                min-height: 48px;
+                padding: 12px 16px;
+            }
+
+            .mode-btn {
+                min-height: 40px;
+                padding: 8px 14px;
+            }
+        }
+
+        /* Dark mode support for OLED screens - battery savings */
+        @media (prefers-color-scheme: dark) {
+            .visual-cell {
+                background: rgba(40, 40, 50, 0.9);
+            }
+
+            .visual-cell.preview {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.6), rgba(118, 75, 162, 0.6));
+            }
+
+            .equation-builder {
+                background: linear-gradient(135deg, #2d2d3d, #3d3d4d);
+                color: #e0e0e0;
+            }
+
+            .visual-target {
+                background: linear-gradient(135deg, #3d3020, #4d4030);
+                border-color: #ff9800;
+            }
+
+            .visual-target .target-equation {
+                color: #ffb74d;
+            }
+
+            .visual-target .target-hint {
+                color: #ffcc80;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
@@ -607,10 +1043,27 @@
                 </div>
             </div>
 
+            <!-- Game 3: Visual Builder -->
+            <div class="menu-card game-container p-4 sm:p-6" onclick="startGame('visual')">
+                <div class="flex items-center gap-4">
+                    <div class="game-icon text-4xl sm:text-6xl" style="animation-delay: 1s;">📐</div>
+                    <div class="flex-1">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Constructor Visual</h2>
+                        <p class="text-gray-600 text-sm sm:text-base">Construeix rectangles per aprendre les multiplicacions visualment!</p>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-semibold">Geometria</span>
+                            <span class="bg-cyan-100 text-cyan-800 px-2 py-1 rounded-full text-xs font-semibold">Àrea</span>
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-semibold">Visual</span>
+                        </div>
+                    </div>
+                    <div class="text-3xl">▶️</div>
+                </div>
+            </div>
+
             <!-- High Scores Display -->
             <div class="game-container p-4 sm:p-6">
                 <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 text-center">🏆 Millors Puntuacions</h3>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div class="text-center">
                         <div class="text-2xl sm:text-3xl font-bold text-purple-600" id="hunter-highscore">0</div>
                         <div class="text-gray-600 text-sm">Caçador</div>
@@ -618,6 +1071,10 @@
                     <div class="text-center">
                         <div class="text-2xl sm:text-3xl font-bold text-orange-600" id="speed-highscore">0</div>
                         <div class="text-gray-600 text-sm">Velocitat</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl sm:text-3xl font-bold text-indigo-600" id="visual-highscore">0</div>
+                        <div class="text-gray-600 text-sm">Visual</div>
                     </div>
                 </div>
             </div>
@@ -872,6 +1329,155 @@
         </div>
     </div>
 
+    <!-- ==================== GAME 3: VISUAL BUILDER ==================== -->
+    <div id="visual-game" style="display: none;">
+        <!-- Back to Menu Button -->
+        <div class="fixed top-2 left-2 sm:top-4 sm:left-4 z-40">
+            <button onclick="showMenu()" class="bg-white text-indigo-600 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-xs sm:text-sm">
+                ◀️ Menú
+            </button>
+        </div>
+
+        <!-- Score Display -->
+        <div class="fixed top-2 right-16 sm:top-4 sm:right-28 z-40 bg-white px-3 py-2 rounded-full shadow-lg">
+            <span class="text-indigo-600 font-bold text-sm sm:text-base">⭐ <span id="visual-score">0</span></span>
+        </div>
+
+        <!-- Level Display -->
+        <div class="fixed top-2 right-2 sm:top-4 sm:right-4 z-40 bg-white px-3 py-2 rounded-full shadow-lg">
+            <span class="text-emerald-600 font-bold text-sm sm:text-base">📐 <span id="visual-level">1</span></span>
+        </div>
+
+        <div class="container mx-auto px-2 py-2 max-w-lg sm:px-4 sm:py-6">
+            <!-- Header -->
+            <div class="text-center mb-2 sm:mb-4">
+                <h1 class="text-xl sm:text-3xl font-bold text-white mb-1 drop-shadow-lg">📐 Constructor Visual</h1>
+                <p class="text-white text-xs sm:text-base opacity-90">Dibuixa rectangles per resoldre multiplicacions!</p>
+            </div>
+
+            <!-- Target Display -->
+            <div class="game-container p-3 sm:p-4 mb-3">
+                <div class="visual-target">
+                    <div class="target-equation" id="visual-target-equation">? × ? = ?</div>
+                    <div class="target-hint" id="visual-target-hint">Dibuixa un rectangle amb aquesta àrea</div>
+                </div>
+            </div>
+
+            <!-- Game Stats Row -->
+            <div class="game-container p-3 sm:p-4 mb-3">
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                        <div class="text-lg sm:text-xl font-bold text-purple-600" id="visual-streak">0</div>
+                        <div class="text-gray-600 text-xs">Ratxa</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-xl font-bold text-green-600" id="visual-correct">0</div>
+                        <div class="text-gray-600 text-xs">Correctes</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-xl font-bold text-blue-600" id="visual-hints-left">3</div>
+                        <div class="text-gray-600 text-xs">Pistes</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-xl font-bold text-orange-600" id="visual-mode">Lliure</div>
+                        <div class="text-gray-600 text-xs">Mode</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Selection Display -->
+            <div class="game-container p-3 sm:p-4 mb-3">
+                <div class="equation-builder" id="visual-equation-display">
+                    <span class="factor" id="visual-width">0</span>
+                    <span>×</span>
+                    <span class="factor" id="visual-height">0</span>
+                    <span class="equals">=</span>
+                    <span class="result" id="visual-area">0</span>
+                </div>
+            </div>
+
+            <!-- Visual Grid Container -->
+            <div class="game-container p-3 sm:p-4 mb-3">
+                <div class="relative flex justify-center">
+                    <div id="visual-grid" class="visual-grid" style="grid-template-columns: repeat(10, 1fr);">
+                        <!-- Grid cells will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="game-container p-3 sm:p-4">
+                <div class="visual-controls">
+                    <button id="visual-check-btn" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-xl active:scale-95">
+                        ✓ Comprova
+                    </button>
+                    <button id="visual-clear-btn" class="bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg hover:shadow-xl active:scale-95">
+                        🗑️ Neteja
+                    </button>
+                    <button id="visual-hint-btn" class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg hover:shadow-xl active:scale-95">
+                        💡 Pista
+                    </button>
+                    <button id="visual-skip-btn" class="bg-gradient-to-r from-blue-400 to-indigo-400 text-white shadow-lg hover:shadow-xl active:scale-95">
+                        ⏭️ Saltar
+                    </button>
+                </div>
+
+                <!-- Mode Selection -->
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <div class="text-center text-sm text-gray-600 mb-2">Mode de joc:</div>
+                    <div class="flex justify-center gap-2">
+                        <button id="mode-free" class="mode-btn bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full text-sm font-semibold active">
+                            🎨 Lliure
+                        </button>
+                        <button id="mode-challenge" class="mode-btn bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+                            🎯 Repte
+                        </button>
+                        <button id="mode-explore" class="mode-btn bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+                            🔍 Explora
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="text-center text-gray-500 text-xs mt-3 hidden sm:block">
+                    <p>📱 Toca i arrossega per dibuixar rectangles</p>
+                    <p>📐 L'àrea del rectangle = multiplicació!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Celebration Overlay for Visual -->
+        <div id="visual-celebration" class="celebration-overlay">
+            <div class="flex items-center justify-center h-full p-4">
+                <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto transform scale-0" id="visual-celebration-content">
+                    <div class="text-5xl sm:text-6xl mb-3" id="visual-celebration-emoji">🎉</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" id="visual-celebration-title">Excel·lent!</h2>
+                    <p class="text-gray-600 mb-3" id="visual-celebration-message">Has construït el rectangle correctament!</p>
+
+                    <!-- Visual representation of the solution -->
+                    <div class="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-4 mb-3">
+                        <div class="text-2xl font-bold text-indigo-600" id="visual-solution-equation">3 × 4 = 12</div>
+                        <div class="text-sm text-gray-500 mt-1">Àrea = Amplada × Alçada</div>
+                    </div>
+
+                    <div class="text-3xl mb-3" id="visual-celebration-stars">
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg p-3 mb-3">
+                        <div class="text-2xl font-bold text-green-600">+<span id="visual-points-earned">0</span> punts!</div>
+                    </div>
+
+                    <button id="visual-continue-btn" class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:shadow-lg active:scale-95 transition-all duration-300 text-sm sm:text-base">
+                        🎮 Continua
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Audio Elements -->
     <audio id="correct-sound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
@@ -893,6 +1499,7 @@
         // ==================== GLOBAL FUNCTIONS ====================
         let hunterGame = null;
         let speedGame = null;
+        let visualGame = null;
 
         // Audio context for mobile - needs user interaction to unlock
         let audioUnlocked = false;
@@ -940,14 +1547,17 @@
         function loadHighScores() {
             const hunterHS = localStorage.getItem('hunterHighScore') || 0;
             const speedHS = localStorage.getItem('speedHighScore') || 0;
+            const visualHS = localStorage.getItem('visualHighScore') || 0;
             document.getElementById('hunter-highscore').textContent = hunterHS;
             document.getElementById('speed-highscore').textContent = speedHS;
+            document.getElementById('visual-highscore').textContent = visualHS;
         }
 
         function showMenu() {
             document.getElementById('main-menu').style.display = 'block';
             document.getElementById('hunter-game').style.display = 'none';
             document.getElementById('speed-game').style.display = 'none';
+            document.getElementById('visual-game').style.display = 'none';
             if (speedGame) speedGame.stopGame();
             loadHighScores();
         }
@@ -961,6 +1571,7 @@
             if (gameType === 'hunter') {
                 document.getElementById('hunter-game').style.display = 'block';
                 document.getElementById('speed-game').style.display = 'none';
+                document.getElementById('visual-game').style.display = 'none';
                 if (!hunterGame) {
                     hunterGame = new MultipleHunterGame();
                 } else {
@@ -969,10 +1580,20 @@
             } else if (gameType === 'speed') {
                 document.getElementById('hunter-game').style.display = 'none';
                 document.getElementById('speed-game').style.display = 'block';
+                document.getElementById('visual-game').style.display = 'none';
                 if (!speedGame) {
                     speedGame = new SpeedChallengeGame();
                 } else {
                     speedGame.resetToStart();
+                }
+            } else if (gameType === 'visual') {
+                document.getElementById('hunter-game').style.display = 'none';
+                document.getElementById('speed-game').style.display = 'none';
+                document.getElementById('visual-game').style.display = 'block';
+                if (!visualGame) {
+                    visualGame = new VisualBuilderGame();
+                } else {
+                    visualGame.resetGame();
                 }
             }
         }
@@ -2265,6 +2886,767 @@
                 });
 
                 this.hideStreakBadge();
+                this.updateDisplay();
+            }
+        }
+
+        // ==================== GAME 3: VISUAL BUILDER ====================
+        class VisualBuilderGame {
+            constructor() {
+                this.gridSize = { rows: 10, cols: 10 };
+                this.score = 0;
+                this.level = 1;
+                this.streak = 0;
+                this.correctAnswers = 0;
+                this.hintsLeft = 3;
+                this.mode = 'free'; // 'free', 'challenge', 'explore'
+
+                // Current problem
+                this.targetFactor1 = 0;
+                this.targetFactor2 = 0;
+                this.targetProduct = 0;
+
+                // Selection state
+                this.selectedCells = new Set();
+                this.isSelecting = false;
+                this.selectionStart = null;
+                this.selectionEnd = null;
+
+                // Touch handling
+                this.touchStartCell = null;
+
+                // Performance optimization: cache DOM references
+                this.gridElement = null;
+                this.cellElements = [];
+                this.displayElements = {};
+
+                // Throttle touch move updates for performance
+                this.lastTouchMoveTime = 0;
+                this.touchMoveThrottle = 16; // ~60fps
+                this.pendingUpdate = null;
+
+                // Track last selection bounds to avoid unnecessary repaints
+                this.lastSelectionBounds = null;
+
+                // Level progression
+                this.problemsPerLevel = 5;
+                this.maxFactorByLevel = {
+                    1: 5,   // Levels 1: factors 2-5
+                    2: 7,   // Level 2: factors 2-7
+                    3: 10,  // Level 3+: factors 2-10
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.cacheElements();
+                this.createGrid();
+                this.bindEvents();
+                this.generateProblem();
+                this.updateDisplay();
+            }
+
+            // Cache DOM elements for faster access
+            cacheElements() {
+                this.gridElement = document.getElementById('visual-grid');
+                this.displayElements = {
+                    width: document.getElementById('visual-width'),
+                    height: document.getElementById('visual-height'),
+                    area: document.getElementById('visual-area'),
+                    score: document.getElementById('visual-score'),
+                    level: document.getElementById('visual-level'),
+                    streak: document.getElementById('visual-streak'),
+                    correct: document.getElementById('visual-correct'),
+                    hintsLeft: document.getElementById('visual-hints-left'),
+                    mode: document.getElementById('visual-mode'),
+                    targetEquation: document.getElementById('visual-target-equation'),
+                    targetHint: document.getElementById('visual-target-hint')
+                };
+            }
+
+            createGrid() {
+                // Use DocumentFragment for batch DOM insertion
+                const fragment = document.createDocumentFragment();
+                this.gridElement.innerHTML = '';
+                this.gridElement.style.gridTemplateColumns = `repeat(${this.gridSize.cols}, 1fr)`;
+                this.cellElements = [];
+
+                for (let row = 0; row < this.gridSize.rows; row++) {
+                    for (let col = 0; col < this.gridSize.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'visual-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        const index = row * this.gridSize.cols + col;
+                        cell.dataset.index = index;
+                        fragment.appendChild(cell);
+                        this.cellElements[index] = cell;
+                    }
+                }
+
+                this.gridElement.appendChild(fragment);
+            }
+
+            bindEvents() {
+                // Touch events for mobile drag selection
+                // Use passive: false only where we need to prevent default
+                this.gridElement.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                this.gridElement.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                this.gridElement.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
+                this.gridElement.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: true });
+
+                // Mouse events for desktop
+                this.gridElement.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.gridElement.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.gridElement.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                this.gridElement.addEventListener('mouseleave', (e) => this.handleMouseUp(e));
+
+                // Control buttons
+                const checkBtn = document.getElementById('visual-check-btn');
+                const clearBtn = document.getElementById('visual-clear-btn');
+                const hintBtn = document.getElementById('visual-hint-btn');
+                const skipBtn = document.getElementById('visual-skip-btn');
+                const continueBtn = document.getElementById('visual-continue-btn');
+
+                // Touch-optimized button handlers
+                [checkBtn, clearBtn, hintBtn, skipBtn, continueBtn].forEach(btn => {
+                    if (!btn) return;
+                    let touchHandled = false;
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        touchHandled = true;
+                        this.handleButtonClick(btn.id);
+                    }, { passive: false });
+                    btn.addEventListener('click', () => {
+                        if (!touchHandled) this.handleButtonClick(btn.id);
+                        touchHandled = false;
+                    });
+                });
+
+                // Mode buttons
+                ['mode-free', 'mode-challenge', 'mode-explore'].forEach(modeId => {
+                    const btn = document.getElementById(modeId);
+                    if (!btn) return;
+                    let touchHandled = false;
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        touchHandled = true;
+                        this.setMode(modeId.replace('mode-', ''));
+                    }, { passive: false });
+                    btn.addEventListener('click', () => {
+                        if (!touchHandled) this.setMode(modeId.replace('mode-', ''));
+                        touchHandled = false;
+                    });
+                });
+            }
+
+            handleButtonClick(buttonId) {
+                switch (buttonId) {
+                    case 'visual-check-btn':
+                        this.checkAnswer();
+                        break;
+                    case 'visual-clear-btn':
+                        this.clearSelection();
+                        break;
+                    case 'visual-hint-btn':
+                        this.showHint();
+                        break;
+                    case 'visual-skip-btn':
+                        this.skipProblem();
+                        break;
+                    case 'visual-continue-btn':
+                        this.hideCelebration();
+                        break;
+                }
+            }
+
+            setMode(mode) {
+                this.mode = mode;
+
+                // Cache mode buttons on first use if not already cached
+                if (!this.modeBtns) {
+                    this.modeBtns = {
+                        free: document.getElementById('mode-free'),
+                        challenge: document.getElementById('mode-challenge'),
+                        explore: document.getElementById('mode-explore')
+                    };
+                }
+
+                // Update active state efficiently
+                Object.values(this.modeBtns).forEach(btn => btn.classList.remove('active'));
+                this.modeBtns[mode].classList.add('active');
+
+                const modeNames = { free: 'Lliure', challenge: 'Repte', explore: 'Explora' };
+                this.displayElements.mode.textContent = modeNames[mode];
+
+                // Reset hints for new mode
+                this.hintsLeft = mode === 'challenge' ? 2 : 3;
+                this.displayElements.hintsLeft.textContent = this.hintsLeft;
+
+                this.generateProblem();
+                this.clearSelection();
+            }
+
+            getCellFromPoint(x, y) {
+                // Optimized: use elementFromPoint (single element) then check
+                const element = document.elementFromPoint(x, y);
+                if (element && element.classList.contains('visual-cell')) {
+                    return element;
+                }
+                // Fallback for edge cases (borders/gaps)
+                const elements = document.elementsFromPoint(x, y);
+                return elements.find(el => el.classList.contains('visual-cell'));
+            }
+
+            // Get cell by index from cache (O(1) lookup)
+            getCellByCoords(row, col) {
+                const index = row * this.gridSize.cols + col;
+                return this.cellElements[index];
+            }
+
+            handleTouchStart(e) {
+                if (e.touches.length !== 1) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                const cell = this.getCellFromPoint(touch.clientX, touch.clientY);
+
+                if (cell) {
+                    this.isSelecting = true;
+                    this.selectionStart = {
+                        row: parseInt(cell.dataset.row),
+                        col: parseInt(cell.dataset.col)
+                    };
+                    this.selectionEnd = { ...this.selectionStart };
+                    // Provide immediate haptic-like visual feedback
+                    cell.style.transform = 'scale(0.9) translateZ(0)';
+                    this.scheduleSelectionUpdate();
+                }
+            }
+
+            handleTouchMove(e) {
+                if (!this.isSelecting || e.touches.length !== 1) return;
+                e.preventDefault();
+
+                // Throttle updates for performance on lower-end devices
+                const now = performance.now();
+                if (now - this.lastTouchMoveTime < this.touchMoveThrottle) {
+                    // Schedule an update for the end of the throttle period
+                    if (!this.pendingUpdate) {
+                        this.pendingUpdate = requestAnimationFrame(() => {
+                            this.pendingUpdate = null;
+                            this.processTouchMove(e.touches[0]);
+                        });
+                    }
+                    return;
+                }
+                this.lastTouchMoveTime = now;
+                this.processTouchMove(e.touches[0]);
+            }
+
+            processTouchMove(touch) {
+                const cell = this.getCellFromPoint(touch.clientX, touch.clientY);
+
+                if (cell) {
+                    const newEnd = {
+                        row: parseInt(cell.dataset.row),
+                        col: parseInt(cell.dataset.col)
+                    };
+
+                    // Only update if selection has actually changed
+                    if (!this.selectionEnd ||
+                        newEnd.row !== this.selectionEnd.row ||
+                        newEnd.col !== this.selectionEnd.col) {
+                        this.selectionEnd = newEnd;
+                        this.scheduleSelectionUpdate();
+                    }
+                }
+            }
+
+            handleTouchEnd(e) {
+                // Cancel any pending updates
+                if (this.pendingUpdate) {
+                    cancelAnimationFrame(this.pendingUpdate);
+                    this.pendingUpdate = null;
+                }
+
+                if (this.isSelecting) {
+                    this.finalizeSelection();
+                }
+                this.isSelecting = false;
+            }
+
+            handleMouseDown(e) {
+                const cell = e.target.closest('.visual-cell');
+                if (!cell) return;
+
+                this.isSelecting = true;
+                this.selectionStart = {
+                    row: parseInt(cell.dataset.row),
+                    col: parseInt(cell.dataset.col)
+                };
+                this.selectionEnd = { ...this.selectionStart };
+                this.scheduleSelectionUpdate();
+            }
+
+            handleMouseMove(e) {
+                if (!this.isSelecting) return;
+
+                const cell = e.target.closest('.visual-cell');
+                if (cell) {
+                    const newEnd = {
+                        row: parseInt(cell.dataset.row),
+                        col: parseInt(cell.dataset.col)
+                    };
+
+                    // Only update if selection has actually changed
+                    if (!this.selectionEnd ||
+                        newEnd.row !== this.selectionEnd.row ||
+                        newEnd.col !== this.selectionEnd.col) {
+                        this.selectionEnd = newEnd;
+                        this.scheduleSelectionUpdate();
+                    }
+                }
+            }
+
+            handleMouseUp(e) {
+                if (this.isSelecting) {
+                    this.finalizeSelection();
+                }
+                this.isSelecting = false;
+            }
+
+            // Schedule selection update using requestAnimationFrame
+            scheduleSelectionUpdate() {
+                if (!this.pendingUpdate) {
+                    this.pendingUpdate = requestAnimationFrame(() => {
+                        this.pendingUpdate = null;
+                        this.updateSelectionPreview();
+                    });
+                }
+            }
+
+            updateSelectionPreview() {
+                if (!this.selectionStart || !this.selectionEnd) return;
+
+                const minRow = Math.min(this.selectionStart.row, this.selectionEnd.row);
+                const maxRow = Math.max(this.selectionStart.row, this.selectionEnd.row);
+                const minCol = Math.min(this.selectionStart.col, this.selectionEnd.col);
+                const maxCol = Math.max(this.selectionStart.col, this.selectionEnd.col);
+
+                // Check if bounds have changed
+                const currentBounds = `${minRow}-${maxRow}-${minCol}-${maxCol}`;
+                if (this.lastSelectionBounds === currentBounds) {
+                    return; // No change, skip repaint
+                }
+                this.lastSelectionBounds = currentBounds;
+
+                const width = maxCol - minCol + 1;
+                const height = maxRow - minRow + 1;
+
+                // Batch DOM updates using cached elements
+                // First pass: remove classes from all cells
+                const cellCount = this.cellElements.length;
+                for (let i = 0; i < cellCount; i++) {
+                    const cell = this.cellElements[i];
+                    cell.classList.remove('preview', 'selected');
+                    cell.style.transform = '';
+                }
+
+                // Second pass: add preview class to selected cells
+                for (let row = minRow; row <= maxRow; row++) {
+                    for (let col = minCol; col <= maxCol; col++) {
+                        const cell = this.getCellByCoords(row, col);
+                        if (cell) {
+                            cell.classList.add('preview');
+                        }
+                    }
+                }
+
+                // Update dimension display using cached elements
+                this.displayElements.width.textContent = width;
+                this.displayElements.height.textContent = height;
+                this.displayElements.area.textContent = width * height;
+            }
+
+            finalizeSelection() {
+                if (!this.selectionStart || !this.selectionEnd) return;
+
+                const minRow = Math.min(this.selectionStart.row, this.selectionEnd.row);
+                const maxRow = Math.max(this.selectionStart.row, this.selectionEnd.row);
+                const minCol = Math.min(this.selectionStart.col, this.selectionEnd.col);
+                const maxCol = Math.max(this.selectionStart.col, this.selectionEnd.col);
+
+                this.selectedCells.clear();
+
+                // Use cached cell elements for O(1) access
+                for (let row = minRow; row <= maxRow; row++) {
+                    for (let col = minCol; col <= maxCol; col++) {
+                        const index = row * this.gridSize.cols + col;
+                        this.selectedCells.add(index);
+                        const cell = this.cellElements[index];
+                        if (cell) {
+                            cell.classList.remove('preview');
+                            cell.classList.add('selected');
+                            cell.style.transform = '';
+                        }
+                    }
+                }
+
+                // Store selection bounds
+                this.currentSelection = {
+                    width: maxCol - minCol + 1,
+                    height: maxRow - minRow + 1,
+                    area: this.selectedCells.size
+                };
+
+                // Reset bounds tracking
+                this.lastSelectionBounds = null;
+            }
+
+            clearSelection() {
+                this.selectedCells.clear();
+                this.selectionStart = null;
+                this.selectionEnd = null;
+                this.currentSelection = null;
+                this.lastSelectionBounds = null;
+
+                // Use cached cell elements - much faster than querySelectorAll
+                const cellCount = this.cellElements.length;
+                for (let i = 0; i < cellCount; i++) {
+                    const cell = this.cellElements[i];
+                    cell.className = 'visual-cell'; // Reset all classes at once
+                    cell.textContent = '';
+                    cell.style.color = '';
+                    cell.style.transform = '';
+                }
+
+                // Use cached display elements
+                this.displayElements.width.textContent = '0';
+                this.displayElements.height.textContent = '0';
+                this.displayElements.area.textContent = '0';
+            }
+
+            generateProblem() {
+                // Determine max factor based on level
+                let maxFactor = 5;
+                if (this.level >= 3) maxFactor = 10;
+                else if (this.level >= 2) maxFactor = 7;
+
+                // Generate factors
+                this.targetFactor1 = Math.floor(Math.random() * (maxFactor - 1)) + 2;
+                this.targetFactor2 = Math.floor(Math.random() * (maxFactor - 1)) + 2;
+                this.targetProduct = this.targetFactor1 * this.targetFactor2;
+
+                // Update display based on mode using cached elements
+                const { targetEquation, targetHint } = this.displayElements;
+
+                if (this.mode === 'explore') {
+                    // Explore mode: show a random multiplication to build
+                    targetEquation.textContent = `${this.targetFactor1} × ${this.targetFactor2} = ?`;
+                    targetHint.textContent = 'Dibuixa un rectangle de ' + this.targetFactor1 + ' × ' + this.targetFactor2;
+                } else if (this.mode === 'challenge') {
+                    // Challenge mode: show only the product
+                    targetEquation.textContent = `? × ? = ${this.targetProduct}`;
+                    targetHint.textContent = 'Troba un rectangle amb àrea ' + this.targetProduct;
+                } else {
+                    // Free mode: show target product with hint
+                    targetEquation.textContent = `${this.targetFactor1} × ${this.targetFactor2} = ${this.targetProduct}`;
+                    targetHint.textContent = 'Dibuixa un rectangle amb àrea ' + this.targetProduct;
+                }
+            }
+
+            checkAnswer() {
+                if (!this.currentSelection || this.selectedCells.size === 0) {
+                    this.showMessage('Dibuixa un rectangle primer!', 'warning');
+                    return;
+                }
+
+                const { width, height, area } = this.currentSelection;
+
+                let isCorrect = false;
+
+                if (this.mode === 'explore') {
+                    // Must match exact dimensions
+                    isCorrect = (width === this.targetFactor1 && height === this.targetFactor2) ||
+                                (width === this.targetFactor2 && height === this.targetFactor1);
+                } else {
+                    // Just needs correct area (any valid factor pair)
+                    isCorrect = area === this.targetProduct;
+                }
+
+                if (isCorrect) {
+                    this.handleCorrectAnswer(width, height, area);
+                } else {
+                    this.handleIncorrectAnswer();
+                }
+            }
+
+            handleCorrectAnswer(width, height, area) {
+                // Mark cells as correct using cached selectedCells set
+                let cellIndex = 0;
+                this.selectedCells.forEach(index => {
+                    const cell = this.cellElements[index];
+                    if (cell) {
+                        cell.classList.remove('selected');
+                        cell.classList.add('correct-area');
+                        cell.textContent = ++cellIndex;
+                        cell.style.color = 'white';
+                    }
+                });
+
+                this.streak++;
+                this.correctAnswers++;
+
+                // Calculate points
+                const basePoints = 20;
+                const streakBonus = Math.min(this.streak - 1, 10) * 5;
+                const levelBonus = (this.level - 1) * 10;
+                const modeBonus = this.mode === 'challenge' ? 20 : this.mode === 'explore' ? 10 : 0;
+                const totalPoints = basePoints + streakBonus + levelBonus + modeBonus;
+
+                this.score += totalPoints;
+                this.updateScore();
+
+                // Check level up
+                this.checkLevelUp();
+
+                playSound('correct');
+
+                // Show celebration
+                setTimeout(() => {
+                    this.showCelebration(width, height, area, totalPoints);
+                }, 600);
+            }
+
+            handleIncorrectAnswer() {
+                // Mark cells as incorrect using cached selectedCells set
+                this.selectedCells.forEach(index => {
+                    const cell = this.cellElements[index];
+                    if (cell) {
+                        cell.classList.add('incorrect-area');
+                    }
+                });
+
+                this.streak = 0;
+                this.updateDisplay();
+
+                playSound('incorrect');
+
+                // Show encouraging message
+                this.showMessage('Torna-ho a provar!', 'error');
+
+                // Clear incorrect state after animation using cached cells
+                setTimeout(() => {
+                    this.selectedCells.forEach(index => {
+                        const cell = this.cellElements[index];
+                        if (cell) {
+                            cell.classList.remove('incorrect-area');
+                        }
+                    });
+                }, 500);
+            }
+
+            showHint() {
+                if (this.hintsLeft <= 0) {
+                    this.showMessage('No tens mes pistes!', 'warning');
+                    return;
+                }
+
+                this.hintsLeft--;
+                this.displayElements.hintsLeft.textContent = this.hintsLeft;
+
+                // Show a valid rectangle outline
+                this.clearSelection();
+
+                const factor1 = this.targetFactor1;
+                const factor2 = this.targetFactor2;
+
+                // Highlight cells that would form a valid rectangle using cached cells
+                const hintCellIndices = [];
+                for (let row = 0; row < factor2; row++) {
+                    for (let col = 0; col < factor1; col++) {
+                        const index = row * this.gridSize.cols + col;
+                        const cell = this.cellElements[index];
+                        if (cell) {
+                            cell.classList.add('hint-cell');
+                            hintCellIndices.push(index);
+                        }
+                    }
+                }
+
+                // Update dimension display using cached elements
+                this.displayElements.width.textContent = factor1;
+                this.displayElements.height.textContent = factor2;
+                this.displayElements.area.textContent = factor1 * factor2;
+
+                playSound('applause');
+
+                // Clear hint after 2 seconds using cached indices
+                setTimeout(() => {
+                    hintCellIndices.forEach(index => {
+                        const cell = this.cellElements[index];
+                        if (cell) {
+                            cell.classList.remove('hint-cell');
+                        }
+                    });
+                    this.displayElements.width.textContent = '0';
+                    this.displayElements.height.textContent = '0';
+                    this.displayElements.area.textContent = '0';
+                }, 2000);
+            }
+
+            skipProblem() {
+                this.streak = 0;
+                this.clearSelection();
+                this.generateProblem();
+                this.updateDisplay();
+                this.showMessage('Nou problema!', 'info');
+            }
+
+            showMessage(text, type = 'info') {
+                const colors = {
+                    info: 'bg-blue-500',
+                    warning: 'bg-yellow-500',
+                    error: 'bg-red-500',
+                    success: 'bg-green-500'
+                };
+
+                const popup = document.createElement('div');
+                popup.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50';
+                popup.innerHTML = `
+                    <div class="${colors[type]} text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium" style="animation: bounce-in 0.3s ease forwards;">
+                        ${text}
+                    </div>
+                `;
+                document.body.appendChild(popup);
+
+                setTimeout(() => {
+                    popup.style.opacity = '0';
+                    popup.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => popup.remove(), 300);
+                }, 1500);
+            }
+
+            checkLevelUp() {
+                const newLevel = Math.floor(this.correctAnswers / this.problemsPerLevel) + 1;
+                if (newLevel > this.level) {
+                    this.level = newLevel;
+                    this.hintsLeft = Math.min(this.hintsLeft + 1, 3); // Bonus hint on level up
+                    this.displayElements.level.textContent = this.level;
+                    this.displayElements.hintsLeft.textContent = this.hintsLeft;
+
+                    // Show level up notification
+                    const popup = document.createElement('div');
+                    popup.className = 'fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50';
+                    popup.innerHTML = `
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-4 rounded-2xl shadow-2xl text-center" style="animation: bounce-in 0.5s ease forwards;">
+                            <div class="text-3xl mb-1">🎉</div>
+                            <div class="text-xl font-bold">Nivell ${this.level}!</div>
+                            <div class="text-sm opacity-90">+1 pista bonus!</div>
+                        </div>
+                    `;
+                    document.body.appendChild(popup);
+
+                    setTimeout(() => {
+                        popup.style.opacity = '0';
+                        popup.style.transition = 'opacity 0.3s ease';
+                        setTimeout(() => popup.remove(), 300);
+                    }, 1500);
+                }
+            }
+
+            updateScore() {
+                this.displayElements.score.textContent = this.score;
+
+                // Update high score
+                const currentHS = parseInt(localStorage.getItem('visualHighScore') || 0);
+                if (this.score > currentHS) {
+                    localStorage.setItem('visualHighScore', this.score);
+                }
+            }
+
+            updateDisplay() {
+                // Batch all display updates using cached elements
+                this.displayElements.score.textContent = this.score;
+                this.displayElements.level.textContent = this.level;
+                this.displayElements.streak.textContent = this.streak;
+                this.displayElements.correct.textContent = this.correctAnswers;
+                this.displayElements.hintsLeft.textContent = this.hintsLeft;
+            }
+
+            showCelebration(width, height, area, points) {
+                const overlay = document.getElementById('visual-celebration');
+                const content = document.getElementById('visual-celebration-content');
+
+                // Determine celebration level
+                let emoji, title, message;
+                if (this.streak >= 5) {
+                    emoji = '🏆';
+                    title = 'Increïble!';
+                    message = `Ratxa de ${this.streak}! Ets un mestre!`;
+                } else if (this.streak >= 3) {
+                    emoji = '🌟';
+                    title = 'Fantàstic!';
+                    message = 'Continues amb bona ratxa!';
+                } else {
+                    emoji = '🎉';
+                    title = 'Excel·lent!';
+                    message = 'Has construït el rectangle correctament!';
+                }
+
+                document.getElementById('visual-celebration-emoji').textContent = emoji;
+                document.getElementById('visual-celebration-title').textContent = title;
+                document.getElementById('visual-celebration-message').textContent = message;
+                document.getElementById('visual-solution-equation').textContent = `${width} × ${height} = ${area}`;
+                document.getElementById('visual-points-earned').textContent = points;
+
+                // Stars based on streak
+                const stars = Math.min(3, Math.floor(this.streak / 2) + 1);
+                const starsContainer = document.getElementById('visual-celebration-stars');
+                let starsHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    if (i < stars) {
+                        starsHTML += '<span class="star">⭐</span>';
+                    } else {
+                        starsHTML += '<span class="star opacity-30">⭐</span>';
+                    }
+                }
+                starsContainer.innerHTML = starsHTML;
+
+                overlay.style.display = 'block';
+
+                anime({
+                    targets: content,
+                    scale: [0, 1],
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .8)'
+                });
+
+                playSound('celebration');
+            }
+
+            hideCelebration() {
+                document.getElementById('visual-celebration').style.display = 'none';
+                this.clearSelection();
+                this.generateProblem();
+            }
+
+            resetGame() {
+                this.score = 0;
+                this.level = 1;
+                this.streak = 0;
+                this.correctAnswers = 0;
+                this.hintsLeft = 3;
+                this.mode = 'free';
+
+                document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('mode-free').classList.add('active');
+                document.getElementById('visual-mode').textContent = 'Lliure';
+
+                this.clearSelection();
+                this.generateProblem();
                 this.updateDisplay();
             }
         }
