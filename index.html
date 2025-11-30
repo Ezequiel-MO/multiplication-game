@@ -703,58 +703,63 @@
 
         .equation-builder {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 8px 12px;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: bold;
             color: #333;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px;
         }
 
         .equation-builder .factor {
             display: inline-block;
-            min-width: 40px;
-            padding: 4px 12px;
+            min-width: 32px;
+            padding: 4px 10px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border-radius: 8px;
-            margin: 0 4px;
+            font-size: 1.1rem;
         }
 
         .equation-builder .equals {
             color: #667eea;
-            margin: 0 8px;
+            margin: 0 4px;
         }
 
         .equation-builder .result {
             display: inline-block;
-            min-width: 50px;
-            padding: 4px 16px;
+            min-width: 40px;
+            padding: 4px 12px;
             background: linear-gradient(135deg, #4CAF50, #8BC34A);
             color: white;
             border-radius: 8px;
-            margin-left: 4px;
+            font-size: 1.1rem;
         }
 
         .visual-target {
             background: linear-gradient(135deg, #fff3e0, #ffe0b2);
             border: 3px dashed #ff9800;
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 10px 16px;
             text-align: center;
         }
 
         .visual-target .target-equation {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #e65100;
         }
 
         .visual-target .target-hint {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: #bf360c;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .mode-btn {
@@ -787,34 +792,41 @@
         /* Mobile adjustments for visual game */
         @media (max-width: 640px) {
             .visual-grid {
-                width: min(95vw, 360px);
+                width: min(95vw, 340px);
                 gap: 1.5px;
             }
 
             .visual-cell {
-                /* On 10x10 grid with 360px width: ~34px per cell - adequate for touch */
-                min-width: 22px;
-                min-height: 22px;
-                font-size: 0.55rem;
+                /* On 10x10 grid with 340px width: ~32px per cell - adequate for touch */
+                min-width: 20px;
+                min-height: 20px;
+                font-size: 0.5rem;
                 border-radius: 3px;
             }
 
             .equation-builder {
-                font-size: 1.25rem;
-                padding: 12px;
+                font-size: 1rem;
+                padding: 6px 10px;
             }
 
             .equation-builder .factor,
             .equation-builder .result {
-                min-width: 36px;
-                padding: 6px 10px;
-                font-size: 1rem;
-                /* Ensure 44px touch target */
-                min-height: 36px;
+                min-width: 28px;
+                padding: 4px 8px;
+                font-size: 0.9rem;
+                min-height: 28px;
+            }
+
+            .visual-target {
+                padding: 8px 12px;
             }
 
             .visual-target .target-equation {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
+            }
+
+            .visual-target .target-hint {
+                font-size: 0.65rem;
             }
 
             .dimension-label {
@@ -826,51 +838,59 @@
                 left: -32px;
             }
 
-            /* Larger control buttons for touch */
+            /* Compact control buttons */
             .visual-controls button {
-                min-height: 48px;
-                min-width: 80px;
-                padding: 10px 14px;
-                font-size: 0.8rem;
+                min-height: 40px;
+                min-width: 60px;
+                padding: 8px 10px;
+                font-size: 0.75rem;
             }
         }
 
         /* Small phones (iPhone SE, older Android) */
         @media (max-width: 375px) {
             .visual-grid {
-                width: min(98vw, 300px);
+                width: min(98vw, 280px);
                 gap: 1px;
                 padding: 2px;
             }
 
             .visual-cell {
-                /* On 10x10 grid with 300px width: ~28px per cell */
-                min-width: 18px;
-                min-height: 18px;
+                /* On 10x10 grid with 280px width: ~26px per cell */
+                min-width: 16px;
+                min-height: 16px;
                 border-radius: 2px;
             }
 
             .equation-builder {
-                font-size: 1rem;
-                padding: 10px;
+                font-size: 0.85rem;
+                padding: 6px 8px;
             }
 
             .equation-builder .factor,
             .equation-builder .result {
-                min-width: 30px;
-                padding: 4px 8px;
-                font-size: 0.9rem;
+                min-width: 24px;
+                padding: 3px 6px;
+                font-size: 0.8rem;
+            }
+
+            .visual-target {
+                padding: 6px 10px;
+            }
+
+            .visual-target .target-equation {
+                font-size: 1.1rem;
             }
 
             .visual-controls button {
-                min-height: 44px;
-                min-width: 70px;
-                padding: 8px 10px;
-                font-size: 0.75rem;
+                min-height: 36px;
+                min-width: 55px;
+                padding: 6px 8px;
+                font-size: 0.7rem;
             }
 
             .visual-controls {
-                gap: 6px;
+                gap: 4px;
             }
         }
 
@@ -1349,65 +1369,42 @@
         </div>
 
         <div class="container mx-auto px-2 py-2 max-w-lg sm:px-4 sm:py-6">
-            <!-- Header -->
-            <div class="text-center mb-2 sm:mb-4">
-                <h1 class="text-xl sm:text-3xl font-bold text-white mb-1 drop-shadow-lg">📐 Constructor Visual</h1>
-                <p class="text-white text-xs sm:text-base opacity-90">Dibuixa rectangles per resoldre multiplicacions!</p>
+            <!-- Compact Header with Stats -->
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
+                <h1 class="text-lg sm:text-2xl font-bold text-white drop-shadow-lg">📐 Constructor Visual</h1>
+                <div class="flex gap-2 text-xs sm:text-sm">
+                    <span class="bg-white/90 px-2 py-1 rounded-full text-purple-600 font-bold">🔥 <span id="visual-streak">0</span></span>
+                    <span class="bg-white/90 px-2 py-1 rounded-full text-green-600 font-bold">✓ <span id="visual-correct">0</span></span>
+                </div>
             </div>
 
-            <!-- Target Display -->
+            <!-- Main Game Card: Target + Grid + Selection in ONE view -->
             <div class="game-container p-3 sm:p-4 mb-3">
-                <div class="visual-target">
+                <!-- Target Display - Compact and prominent -->
+                <div class="visual-target mb-3">
                     <div class="target-equation" id="visual-target-equation">? × ? = ?</div>
-                    <div class="target-hint" id="visual-target-hint">Dibuixa un rectangle amb aquesta àrea</div>
+                    <div class="target-hint text-xs" id="visual-target-hint">Dibuixa un rectangle amb aquesta àrea</div>
                 </div>
-            </div>
 
-            <!-- Game Stats Row -->
-            <div class="game-container p-3 sm:p-4 mb-3">
-                <div class="grid grid-cols-4 gap-2 text-center">
-                    <div>
-                        <div class="text-lg sm:text-xl font-bold text-purple-600" id="visual-streak">0</div>
-                        <div class="text-gray-600 text-xs">Ratxa</div>
-                    </div>
-                    <div>
-                        <div class="text-lg sm:text-xl font-bold text-green-600" id="visual-correct">0</div>
-                        <div class="text-gray-600 text-xs">Correctes</div>
-                    </div>
-                    <div>
-                        <div class="text-lg sm:text-xl font-bold text-blue-600" id="visual-hints-left">3</div>
-                        <div class="text-gray-600 text-xs">Pistes</div>
-                    </div>
-                    <div>
-                        <div class="text-lg sm:text-xl font-bold text-orange-600" id="visual-mode">Lliure</div>
-                        <div class="text-gray-600 text-xs">Mode</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Current Selection Display -->
-            <div class="game-container p-3 sm:p-4 mb-3">
-                <div class="equation-builder" id="visual-equation-display">
+                <!-- Current Selection Display - Inline with grid context -->
+                <div class="equation-builder mb-3 py-2" id="visual-equation-display">
+                    <span class="text-gray-500 text-sm mr-2">La teva selecció:</span>
                     <span class="factor" id="visual-width">0</span>
                     <span>×</span>
                     <span class="factor" id="visual-height">0</span>
                     <span class="equals">=</span>
                     <span class="result" id="visual-area">0</span>
                 </div>
-            </div>
 
-            <!-- Visual Grid Container -->
-            <div class="game-container p-3 sm:p-4 mb-3">
+                <!-- Visual Grid -->
                 <div class="relative flex justify-center">
                     <div id="visual-grid" class="visual-grid" style="grid-template-columns: repeat(10, 1fr);">
                         <!-- Grid cells will be generated by JavaScript -->
                     </div>
                 </div>
-            </div>
 
-            <!-- Controls -->
-            <div class="game-container p-3 sm:p-4">
-                <div class="visual-controls">
+                <!-- Inline Controls - Right below grid -->
+                <div class="visual-controls mt-3 pt-3 border-t border-gray-200">
                     <button id="visual-check-btn" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-xl active:scale-95">
                         ✓ Comprova
                     </button>
@@ -1415,34 +1412,31 @@
                         🗑️ Neteja
                     </button>
                     <button id="visual-hint-btn" class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg hover:shadow-xl active:scale-95">
-                        💡 Pista
+                        💡 <span id="visual-hints-left">3</span>
                     </button>
                     <button id="visual-skip-btn" class="bg-gradient-to-r from-blue-400 to-indigo-400 text-white shadow-lg hover:shadow-xl active:scale-95">
-                        ⏭️ Saltar
+                        ⏭️
                     </button>
                 </div>
+            </div>
 
-                <!-- Mode Selection -->
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <div class="text-center text-sm text-gray-600 mb-2">Mode de joc:</div>
-                    <div class="flex justify-center gap-2">
-                        <button id="mode-free" class="mode-btn bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full text-sm font-semibold active">
+            <!-- Mode Selection - Separate card below -->
+            <div class="game-container p-3 sm:p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Mode:</span>
+                    <div class="flex gap-2">
+                        <button id="mode-free" class="mode-btn bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold active">
                             🎨 Lliure
                         </button>
-                        <button id="mode-challenge" class="mode-btn bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+                        <button id="mode-challenge" class="mode-btn bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
                             🎯 Repte
                         </button>
-                        <button id="mode-explore" class="mode-btn bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-semibold">
+                        <button id="mode-explore" class="mode-btn bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
                             🔍 Explora
                         </button>
                     </div>
                 </div>
-
-                <!-- Instructions -->
-                <div class="text-center text-gray-500 text-xs mt-3 hidden sm:block">
-                    <p>📱 Toca i arrossega per dibuixar rectangles</p>
-                    <p>📐 L'àrea del rectangle = multiplicació!</p>
-                </div>
+                <div id="visual-mode" class="hidden">Lliure</div>
             </div>
         </div>
 
