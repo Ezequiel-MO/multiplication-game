@@ -2,22 +2,41 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
     <title>Mestre de Multiplicacions - Aprèn les Taules</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Safe area CSS variables for notched phones */
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
+        }
+
         body {
             font-family: 'Fredoka', cursive;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
+            /* Safe area padding for notched phones */
+            padding-top: var(--safe-area-inset-top);
+            padding-bottom: var(--safe-area-inset-bottom);
+            padding-left: var(--safe-area-inset-left);
+            padding-right: var(--safe-area-inset-right);
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior-y: contain;
         }
 
         .game-container {
@@ -27,7 +46,7 @@
         }
 
         .number-cell {
-            transition: all 0.3s ease;
+            transition: transform 0.15s ease-out, background-color 0.15s ease-out;
             border-radius: 8px;
             cursor: pointer;
             user-select: none;
@@ -38,14 +57,40 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* GPU acceleration for smoother animations */
+            will-change: transform;
+            transform: translateZ(0);
+            /* Active state feedback */
+            position: relative;
         }
 
-        .number-cell:hover {
-            transform: scale(1.05);
+        /* Only apply hover on devices that support hover (not touch) */
+        @media (hover: hover) and (pointer: fine) {
+            .number-cell:hover {
+                transform: scale(1.05);
+            }
         }
 
         .number-cell:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
+            /* Immediate feedback on touch */
+            transition-duration: 0.05s;
+        }
+
+        /* Touch feedback ripple effect */
+        .number-cell::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.15s ease-out;
+            pointer-events: none;
+        }
+
+        .number-cell:active::after {
+            opacity: 1;
         }
 
         .number-cell.correct {
@@ -151,7 +196,7 @@
         }
 
         .selector-btn {
-            transition: all 0.3s ease;
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
             border-radius: 12px;
             font-weight: 600;
             -webkit-tap-highlight-color: transparent;
@@ -161,15 +206,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* GPU acceleration */
+            will-change: transform;
+            transform: translateZ(0);
         }
 
-        .selector-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        /* Only apply hover on non-touch devices */
+        @media (hover: hover) and (pointer: fine) {
+            .selector-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
         }
 
         .selector-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
+            transition-duration: 0.05s;
         }
 
         .selector-btn.active {
@@ -195,16 +247,22 @@
             width: 10px;
             height: 10px;
             background: #FFD700;
-            animation: confetti-fall 3s linear infinite;
+            animation: confetti-fall 3s linear forwards;
+            /* GPU acceleration for smooth animation */
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            /* Contain paint to confetti elements */
+            contain: layout paint;
         }
 
         @keyframes confetti-fall {
             0% {
-                transform: translateY(-100vh) rotate(0deg);
+                transform: translateY(-100vh) rotate(0deg) translateZ(0);
                 opacity: 1;
             }
             100% {
-                transform: translateY(100vh) rotate(360deg);
+                transform: translateY(100vh) rotate(360deg) translateZ(0);
                 opacity: 0;
             }
         }
@@ -236,16 +294,27 @@
 
         /* Speed game styles */
         .answer-btn {
-            transition: all 0.2s ease;
-            min-height: 60px;
+            transition: transform 0.1s ease-out, background-color 0.1s ease-out;
+            min-height: 70px; /* Larger for better thumb targets */
+            /* GPU acceleration for instant feedback */
+            will-change: transform;
+            transform: translateZ(0);
+            /* Prevent text selection on rapid taps */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
-        .answer-btn:hover {
-            transform: scale(1.05);
+        /* Only apply hover on non-touch devices */
+        @media (hover: hover) and (pointer: fine) {
+            .answer-btn:hover {
+                transform: scale(1.03);
+            }
         }
 
         .answer-btn:active {
             transform: scale(0.95);
+            transition-duration: 0.05s; /* Instant feedback */
         }
 
         .answer-btn.correct-answer {
@@ -259,11 +328,27 @@
         }
 
         .timer-bar {
-            transition: width 0.1s linear;
+            /* Use transform for GPU-accelerated animation instead of width */
+            transition: transform 0.1s linear, background-color 0.3s ease;
+            transform-origin: left center;
+            will-change: transform;
         }
 
         .timer-bar.warning {
             background: linear-gradient(90deg, #FF6B6B, #FF8E8E) !important;
+        }
+
+        /* Speed table selector buttons */
+        .speed-table-btn {
+            transition: transform 0.1s ease-out, background-color 0.15s ease-out;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 44px;
+        }
+
+        .speed-table-btn:active {
+            transform: scale(0.92);
         }
 
         .streak-badge {
@@ -298,10 +383,16 @@
                 padding: 0.75rem !important;
             }
 
+            /*
+             * Grid sizing strategy for mobile:
+             * - Use 8 columns instead of 10 for larger tap targets
+             * - Minimum 32px height/width (still below 44dp ideal but reasonable)
+             * - Font size remains readable at 0.7rem minimum
+             */
             .number-cell {
-                font-size: 0.625rem;
-                min-height: 28px;
-                min-width: 28px;
+                font-size: 0.7rem;
+                min-height: 32px;
+                min-width: 32px;
                 border-radius: 4px;
                 padding: 0.125rem !important;
             }
@@ -309,8 +400,8 @@
             .selector-btn {
                 font-size: 0.875rem;
                 padding: 0.5rem !important;
-                min-height: 36px;
-                min-width: 36px;
+                min-height: 44px; /* Maintain 44dp minimum */
+                min-width: 44px;
             }
 
             h1 {
@@ -328,27 +419,69 @@
 
             .menu-card {
                 padding: 1rem !important;
+                /* Ensure tap target includes whole card */
+                min-height: 80px;
             }
 
             .answer-btn {
-                min-height: 50px;
-                font-size: 1.25rem !important;
+                min-height: 64px; /* Larger for easy thumb taps */
+                font-size: 1.5rem !important;
+            }
+
+            /* Speed game question should be prominent */
+            #speed-question {
+                font-size: 2.5rem !important;
+            }
+
+            /* Equation display readability */
+            #equation-text-inline {
+                font-size: 1.75rem !important;
             }
         }
 
-        /* Extra small phones */
+        /* Extra small phones (4 inch / 320px width) */
         @media (max-width: 375px) {
             .number-cell {
-                font-size: 0.5rem;
-                min-height: 26px;
-                min-width: 26px;
-                padding: 0.0625rem !important;
+                font-size: 0.65rem;
+                min-height: 28px;
+                min-width: 28px;
+                padding: 1px !important;
+                border-radius: 3px;
             }
 
             .selector-btn {
-                min-height: 32px;
-                min-width: 32px;
+                min-height: 40px;
+                min-width: 40px;
                 font-size: 0.75rem;
+            }
+
+            .answer-btn {
+                min-height: 56px;
+                font-size: 1.25rem !important;
+            }
+
+            #speed-question {
+                font-size: 2rem !important;
+            }
+        }
+
+        /* Very small phones (iPhone SE 1st gen, etc.) */
+        @media (max-width: 320px) {
+            .number-cell {
+                font-size: 0.55rem;
+                min-height: 24px;
+                min-width: 24px;
+            }
+
+            /* Use 8-column grid on very small screens */
+            #number-grid {
+                grid-template-columns: repeat(8, 1fr) !important;
+            }
+
+            .selector-btn {
+                min-height: 36px;
+                min-width: 36px;
+                font-size: 0.7rem;
             }
         }
 
@@ -359,17 +492,73 @@
             }
 
             .game-container {
-                padding: 0.75rem !important;
+                padding: 0.5rem !important;
             }
 
             h1 {
-                font-size: 1.5rem !important;
+                font-size: 1.25rem !important;
                 margin-bottom: 0.25rem !important;
             }
 
             h2 {
-                font-size: 1rem !important;
-                margin-bottom: 0.5rem !important;
+                font-size: 0.875rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            /* Smaller grid in landscape */
+            .number-cell {
+                min-height: 24px;
+                min-width: 24px;
+                font-size: 0.55rem;
+            }
+
+            /* Hide equation container in landscape to save space */
+            #equation-container {
+                position: fixed;
+                bottom: 0.5rem;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 30;
+                margin: 0 !important;
+            }
+
+            #equation-display-card {
+                padding: 0.5rem 1rem !important;
+            }
+
+            #equation-text-inline {
+                font-size: 1.25rem !important;
+            }
+        }
+
+        /* Reduced motion for accessibility and battery saving */
+        @media (prefers-reduced-motion: reduce) {
+            .number-cell,
+            .selector-btn,
+            .answer-btn,
+            .menu-card {
+                transition: none !important;
+                animation: none !important;
+            }
+
+            .game-icon {
+                animation: none !important;
+            }
+
+            .confetti {
+                animation: none !important;
+                display: none !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .number-cell {
+                border: 2px solid currentColor;
+            }
+
+            .answer-btn {
+                border: 2px solid #333;
             }
         }
     </style>
@@ -620,7 +809,7 @@
             <!-- Timer Bar -->
             <div class="mb-4">
                 <div class="w-full bg-gray-200 rounded-full h-4 sm:h-6 overflow-hidden">
-                    <div id="timer-bar" class="timer-bar bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full" style="width: 100%"></div>
+                    <div id="timer-bar" class="timer-bar bg-gradient-to-r from-green-400 to-green-600 h-full w-full rounded-full" style="transform: scaleX(1)"></div>
                 </div>
             </div>
 
@@ -705,6 +894,49 @@
         let hunterGame = null;
         let speedGame = null;
 
+        // Audio context for mobile - needs user interaction to unlock
+        let audioUnlocked = false;
+        let audioContext = null;
+
+        // Initialize audio context on first user interaction
+        function initAudioContext() {
+            if (audioUnlocked) return;
+
+            try {
+                // Create AudioContext for mobile browsers
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Resume audio context (required on iOS/Android)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                // Preload and unlock all audio elements
+                const audioElements = document.querySelectorAll('audio');
+                audioElements.forEach(audio => {
+                    // Set audio properties for mobile
+                    audio.load();
+                    // Play and immediately pause to unlock
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        }).catch(() => {});
+                    }
+                });
+
+                audioUnlocked = true;
+            } catch (e) {
+                console.log('Audio context init failed:', e);
+            }
+        }
+
+        // Add event listeners for audio unlock on first interaction
+        ['touchstart', 'touchend', 'click'].forEach(eventType => {
+            document.addEventListener(eventType, initAudioContext, { once: true, passive: true });
+        });
+
         function loadHighScores() {
             const hunterHS = localStorage.getItem('hunterHighScore') || 0;
             const speedHS = localStorage.getItem('speedHighScore') || 0;
@@ -721,6 +953,9 @@
         }
 
         function startGame(gameType) {
+            // Ensure audio is unlocked on game start
+            initAudioContext();
+
             document.getElementById('main-menu').style.display = 'none';
 
             if (gameType === 'hunter') {
@@ -743,11 +978,101 @@
         }
 
         function playSound(type) {
+            // Early return if reduced motion preference (often correlates with wanting less audio)
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+
             try {
                 const audio = document.getElementById(`${type}-sound`);
+                if (!audio) return;
+
+                // Reset to start
                 audio.currentTime = 0;
-                audio.play().catch(() => {});
-            } catch (e) {}
+
+                // Use a promise-based approach for better mobile handling
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        // Autoplay was prevented, silently fail
+                        console.log('Audio playback prevented:', error.message);
+                    });
+                }
+            } catch (e) {
+                // Silently fail - audio is enhancement, not critical
+            }
+        }
+
+        // Optimized touch event handler factory to prevent double-fires
+        function createTouchHandler(callback) {
+            let touchHandled = false;
+            let touchTimeout = null;
+
+            return {
+                onTouchStart: function(e) {
+                    // Only handle single touch
+                    if (e.touches && e.touches.length > 1) return;
+
+                    e.preventDefault();
+                    touchHandled = true;
+
+                    // Clear any existing timeout
+                    if (touchTimeout) clearTimeout(touchTimeout);
+
+                    // Reset flag after a delay to handle edge cases
+                    touchTimeout = setTimeout(() => {
+                        touchHandled = false;
+                    }, 300);
+
+                    callback(e);
+                },
+                onClick: function(e) {
+                    if (!touchHandled) {
+                        callback(e);
+                    }
+                    touchHandled = false;
+                }
+            };
+        }
+
+        // RequestAnimationFrame-based timer for better performance
+        class OptimizedTimer {
+            constructor(callback, interval = 100) {
+                this.callback = callback;
+                this.interval = interval;
+                this.lastTime = 0;
+                this.animationId = null;
+                this.isRunning = false;
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTime = performance.now();
+                this.tick();
+            }
+
+            tick() {
+                if (!this.isRunning) return;
+
+                const currentTime = performance.now();
+                const elapsed = currentTime - this.lastTime;
+
+                if (elapsed >= this.interval) {
+                    this.callback(elapsed);
+                    this.lastTime = currentTime - (elapsed % this.interval);
+                }
+
+                this.animationId = requestAnimationFrame(() => this.tick());
+            }
+
+            stop() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
         }
 
         // ==================== GAME 1: MULTIPLE HUNTER ====================
@@ -1293,20 +1618,48 @@
             }
 
             createConfetti() {
-                const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+                // Skip confetti if reduced motion is preferred (accessibility + battery saving)
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    return;
+                }
 
-                for (let i = 0; i < 50; i++) {
+                const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+                const overlay = document.getElementById('celebration-overlay');
+
+                // Reduce confetti count on mobile for better performance
+                const isMobile = window.innerWidth < 640;
+                const confettiCount = isMobile ? 25 : 50;
+
+                // Use DocumentFragment for batch DOM insertion (better performance)
+                const fragment = document.createDocumentFragment();
+                const confettiElements = [];
+
+                for (let i = 0; i < confettiCount; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDelay = Math.random() * 3 + 's';
-                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-
-                    document.getElementById('celebration-overlay').appendChild(confetti);
-
-                    setTimeout(() => confetti.remove(), 5000);
+                    confetti.style.cssText = `
+                        left: ${Math.random() * 100}vw;
+                        background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+                        animation-delay: ${Math.random() * 2}s;
+                        animation-duration: ${Math.random() * 2 + 2}s;
+                    `;
+                    fragment.appendChild(confetti);
+                    confettiElements.push(confetti);
                 }
+
+                // Single DOM operation for all confetti
+                overlay.appendChild(fragment);
+
+                // Clean up all confetti after animation completes
+                setTimeout(() => {
+                    confettiElements.forEach(el => {
+                        if (el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    });
+                    // Clear the array to help garbage collection
+                    confettiElements.length = 0;
+                }, 4500);
             }
 
             showEquation(number, clickedCell) {
@@ -1401,7 +1754,7 @@
                 // Adaptive timing system
                 this.timeLeft = 100;
                 this.maxTime = 100;
-                this.timerInterval = null;
+                this.gameTimer = null; // Now using OptimizedTimer instead of setInterval
                 this.isPlaying = false;
 
                 // Level-based progression system
@@ -1424,6 +1777,9 @@
                 // Mastery tracking per table
                 this.tableMastery = {};  // { table: { correct: 0, wrong: 0 } }
 
+                // Prevent rapid double-taps on answer buttons
+                this.answerCooldown = false;
+
                 this.init();
             }
 
@@ -1433,37 +1789,52 @@
             }
 
             bindEvents() {
-                // Table selector buttons
+                // Table selector buttons with touch optimization
                 document.querySelectorAll('.speed-table-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    const handler = createTouchHandler(() => {
                         const table = parseInt(btn.dataset.table);
                         if (table) this.toggleTable(table, btn);
                     });
+                    btn.addEventListener('touchstart', handler.onTouchStart, { passive: false });
+                    btn.addEventListener('click', handler.onClick);
                 });
 
-                // Start button
-                document.getElementById('speed-start-btn').addEventListener('click', () => {
+                // Start button with touch optimization
+                const startBtn = document.getElementById('speed-start-btn');
+                const startHandler = createTouchHandler(() => {
                     if (this.activeTables.length > 0) {
                         this.startGame();
                     } else {
                         alert('Selecciona almenys una taula!');
                     }
                 });
+                startBtn.addEventListener('touchstart', startHandler.onTouchStart, { passive: false });
+                startBtn.addEventListener('click', startHandler.onClick);
 
-                // Answer buttons
+                // Answer buttons with touch optimization and double-tap prevention
                 document.querySelectorAll('.answer-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        if (this.isPlaying) {
+                    const handler = createTouchHandler(() => {
+                        if (this.isPlaying && !this.answerCooldown) {
+                            this.answerCooldown = true;
                             this.checkAnswer(parseInt(btn.textContent));
+                            // Reset cooldown after feedback animation
+                            setTimeout(() => {
+                                this.answerCooldown = false;
+                            }, 400);
                         }
                     });
+                    btn.addEventListener('touchstart', handler.onTouchStart, { passive: false });
+                    btn.addEventListener('click', handler.onClick);
                 });
 
-                // Restart button
-                document.getElementById('speed-restart-btn').addEventListener('click', () => {
+                // Restart button with touch optimization
+                const restartBtn = document.getElementById('speed-restart-btn');
+                const restartHandler = createTouchHandler(() => {
                     this.hideGameOver();
                     this.resetToStart();
                 });
+                restartBtn.addEventListener('touchstart', restartHandler.onTouchStart, { passive: false });
+                restartBtn.addEventListener('click', restartHandler.onClick);
             }
 
             toggleTable(table, btn) {
@@ -1518,16 +1889,20 @@
 
             stopGame() {
                 this.isPlaying = false;
-                if (this.timerInterval) {
-                    clearInterval(this.timerInterval);
-                    this.timerInterval = null;
+                if (this.gameTimer) {
+                    this.gameTimer.stop();
+                    this.gameTimer = null;
                 }
             }
 
             startTimer() {
-                this.timerInterval = setInterval(() => {
-                    // Adaptive decay - slows down if player is hesitating
-                    this.timeLeft -= this.currentDecayRate;
+                // Use requestAnimationFrame-based timer for better mobile performance
+                // This reduces battery drain and provides smoother updates
+                this.gameTimer = new OptimizedTimer((elapsed) => {
+                    // Calculate decay based on actual elapsed time for accuracy
+                    // elapsed is in ms, we want to decay based on 100ms intervals
+                    const intervals = elapsed / 100;
+                    this.timeLeft -= this.currentDecayRate * intervals;
                     this.updateTimerBar();
 
                     if (this.timeLeft <= 25) {
@@ -1539,12 +1914,15 @@
                     if (this.timeLeft <= 0) {
                         this.endGame();
                     }
-                }, 100);
+                }, 100); // Update every 100ms but using RAF for better performance
+
+                this.gameTimer.start();
             }
 
             updateTimerBar() {
-                const percentage = (this.timeLeft / this.maxTime) * 100;
-                document.getElementById('timer-bar').style.width = `${Math.max(0, percentage)}%`;
+                const percentage = Math.max(0, this.timeLeft / this.maxTime);
+                // Use scaleX transform for GPU-accelerated animation (better mobile performance)
+                document.getElementById('timer-bar').style.transform = `scaleX(${percentage})`;
             }
 
             // Calculate the target decay rate for the current level
@@ -1876,7 +2254,7 @@
                 });
                 document.getElementById('speed-start-btn').style.display = 'block';
 
-                document.getElementById('timer-bar').style.width = '100%';
+                document.getElementById('timer-bar').style.transform = 'scaleX(1)';
                 document.getElementById('timer-bar').classList.remove('warning');
 
                 document.getElementById('speed-question').textContent = 'Prem Juga!';
