@@ -1301,58 +1301,67 @@
                 </div>
             </div>
 
-            <!-- Timer Bar -->
-            <div class="mb-4">
-                <div class="w-full bg-gray-200 rounded-full h-4 sm:h-6 overflow-hidden">
-                    <div id="timer-bar" class="timer-bar bg-gradient-to-r from-green-400 to-green-600 h-full w-full rounded-full" style="transform: scaleX(1)"></div>
+            <!-- Game Area (shown during game) -->
+            <div id="speed-game-area" style="display: none;">
+                <!-- Timer Bar -->
+                <div class="mb-4">
+                    <div class="w-full bg-gray-200 rounded-full h-4 sm:h-6 overflow-hidden">
+                        <div id="timer-bar" class="timer-bar bg-gradient-to-r from-green-400 to-green-600 h-full w-full rounded-full" style="transform: scaleX(1)"></div>
+                    </div>
+                </div>
+
+                <!-- Question Display -->
+                <div class="game-container p-6 sm:p-8 mb-4 text-center">
+                    <div id="speed-question" class="text-4xl sm:text-6xl font-bold text-gray-800 mb-2"></div>
+                    <div id="streak-badge" class="streak-badge inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full font-bold text-sm sm:text-base" style="display: none;">
+                        🔥 Ratxa de <span id="streak-number">5</span>!
+                    </div>
+                </div>
+
+                <!-- Answer Buttons -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4" id="answer-buttons">
+                    <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="0">?</button>
+                    <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="1">?</button>
+                    <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="2">?</button>
+                    <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="3">?</button>
                 </div>
             </div>
 
-            <!-- Question Display -->
-            <div class="game-container p-6 sm:p-8 mb-4 text-center">
-                <div id="speed-question" class="text-4xl sm:text-6xl font-bold text-gray-800 mb-2">
-                    Prem Juga!
+            <!-- Start Area (shown before game) -->
+            <div id="speed-start-area">
+                <!-- Game Mode Selector -->
+                <div class="game-container p-3 mb-3">
+                    <h3 class="text-sm font-bold text-gray-800 mb-2 text-center">Mode de joc:</h3>
+                    <div class="flex justify-center gap-2">
+                        <button id="speed-mode-product" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-purple-600 text-white">
+                            3 × 4 = ?
+                        </button>
+                        <button id="speed-mode-factor" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-gray-300 text-gray-600">
+                            3 × ? = 12
+                        </button>
+                    </div>
                 </div>
-                <div id="streak-badge" class="streak-badge inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full font-bold text-sm sm:text-base" style="display: none;">
-                    🔥 Ratxa de <span id="streak-number">5</span>!
-                </div>
-            </div>
 
-            <!-- Answer Buttons -->
-            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4" id="answer-buttons">
-                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="0">?</button>
-                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="1">?</button>
-                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="2">?</button>
-                <button class="answer-btn game-container p-4 text-2xl sm:text-3xl font-bold text-gray-800" data-answer="3">?</button>
-            </div>
-
-            <!-- Game Mode Selector -->
-            <div class="game-container p-3 mb-3">
-                <div class="flex justify-center gap-2">
-                    <button id="speed-mode-product" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-purple-600 text-white">
-                        3 × 4 = ?
-                    </button>
-                    <button id="speed-mode-factor" class="speed-mode-btn px-4 py-2 rounded-lg text-sm font-bold bg-gray-300 text-gray-600">
-                        3 × ? = 12
-                    </button>
+                <!-- Table Selector for Speed Game -->
+                <div class="game-container p-4 mb-4">
+                    <h3 class="text-sm font-bold text-gray-800 mb-2 text-center">Taules actives:</h3>
+                    <div class="grid grid-cols-5 gap-2" id="speed-table-selector">
+                        <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="2">2</button>
+                        <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="3">3</button>
+                        <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="4">4</button>
+                        <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="5">5</button>
+                        <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="6">6</button>
+                        <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="7">7</button>
+                        <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="8">8</button>
+                        <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="9">9</button>
+                        <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="10">10</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Table Selector for Speed Game -->
-            <div class="game-container p-4">
-                <h3 class="text-sm font-bold text-gray-800 mb-2 text-center">Taules actives:</h3>
-                <div class="grid grid-cols-5 gap-2" id="speed-table-selector">
-                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="2">2</button>
-                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="3">3</button>
-                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="4">4</button>
-                    <button class="speed-table-btn bg-green-500 text-white p-2 rounded-lg text-sm font-bold active" data-table="5">5</button>
-                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="6">6</button>
-                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="7">7</button>
-                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="8">8</button>
-                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="9">9</button>
-                    <button class="speed-table-btn bg-gray-300 text-gray-600 p-2 rounded-lg text-sm font-bold" data-table="10">10</button>
-                    <button id="speed-start-btn" class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2 rounded-lg text-sm font-bold">▶️ Juga!</button>
-                </div>
+                <!-- Big Start Button -->
+                <button id="speed-start-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white p-5 rounded-2xl text-2xl font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 animate-pulse">
+                    ▶️ JUGA!
+                </button>
             </div>
         </div>
 
@@ -2560,16 +2569,9 @@
                     this.tableMastery[table] = { correct: 0, wrong: 0 };
                 });
 
-                // Disable table and mode selection during game
-                document.querySelectorAll('.speed-table-btn').forEach(btn => {
-                    btn.style.pointerEvents = 'none';
-                    btn.style.opacity = '0.5';
-                });
-                document.querySelectorAll('.speed-mode-btn').forEach(btn => {
-                    btn.style.pointerEvents = 'none';
-                    btn.style.opacity = '0.5';
-                });
-                document.getElementById('speed-start-btn').style.display = 'none';
+                // Hide start area, show game area
+                document.getElementById('speed-start-area').style.display = 'none';
+                document.getElementById('speed-game-area').style.display = 'block';
 
                 this.updateDisplay();
                 this.generateQuestion();
@@ -2973,20 +2975,12 @@
                 this.avgResponseTime = 3000;
                 this.tableMastery = {};
 
-                document.querySelectorAll('.speed-table-btn').forEach(btn => {
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.opacity = '1';
-                });
-                document.querySelectorAll('.speed-mode-btn').forEach(btn => {
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.opacity = '1';
-                });
-                document.getElementById('speed-start-btn').style.display = 'block';
+                // Show start area, hide game area
+                document.getElementById('speed-start-area').style.display = 'block';
+                document.getElementById('speed-game-area').style.display = 'none';
 
                 document.getElementById('timer-bar').style.transform = 'scaleX(1)';
                 document.getElementById('timer-bar').classList.remove('warning');
-
-                document.getElementById('speed-question').textContent = 'Prem Juga!';
 
                 document.querySelectorAll('.answer-btn').forEach((btn) => {
                     btn.textContent = '?';
